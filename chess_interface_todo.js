@@ -7,6 +7,7 @@ function legalMoves(board) {
 
 function playMove(board, move) {
     //returns a new board, but with the move played
+    //inclusive of piece.
 }
 
 function scoreBoard(board) {

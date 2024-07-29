@@ -390,7 +390,6 @@ function isNumberLike(_string) {
     return _string === parseInt(_string).toString();
 }
 
-//testerinitialboard
 let testerInitialBoard = [
     {
         board: [
@@ -414,33 +413,10 @@ let testerInitialBoard = [
     }
 ];
 
-let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/p7/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
 let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
 
-// let board = [
-//     [{}, {}, {}, {}, {}, {}, {}, { type: 'king', color: 'black' }],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, { type: 'queen', color: 'black' }, {}],
-//     [{}, {}, {}, {}, {}, {}, { type: 'queen', color: 'white' }, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{ type: 'king', color: 'white' }, {}, {}, {}, {}, {}, {}, {}],
-// ];
-//stalemate check^
-
-// let enPassantTestBoard = [
-//     [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
-//     [{ type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{ type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'black' }],
-//     [{ type: 'rook', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'queen', color: 'white' }, { type: 'king', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'rook', color: 'white' }]
-// ];
-//this is a fake board^^^
 
 let blackPawnCheckingWhiteKing = [
     [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
@@ -601,7 +577,7 @@ function drawBoard(_board) {
         highlightPiece(selectedSquare.row, selectedSquare.col)
     }
     //add logic for highlighting en passant capture, poss refactor
-    let moves = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, board));
+    let moves = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory));
     if (moves.length === 0) {
         return;
     }
@@ -741,7 +717,7 @@ function onClick(event) {
         selectedSquare = { row: row, col: col };
         selectedPieceType = square.type;
     } else if (selectedSquare) {
-        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, board));
+        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory));
         let isDestinationValid = false;
         for (let i = 0; i < validDestinations.length; i++) {
             if (validDestinations[i].row === row && validDestinations[i].col === col) {
@@ -750,17 +726,18 @@ function onClick(event) {
             }
         }
         if (isDestinationValid) {
-            // let enPassantSquare = returnEnPassantSquare(piece, );
-            // if (enPassantSquare && selectedPieceType === 'pawn') {
-            //     let lastMove = moveHistory[moveHistory.length - 1];
-            //     let behindRow = (boardHistory[boardHistory.length - 1].playerTurn === 'white') ? 2 : 5;
-            //     if (row === behindRow && col === lastMove.to.col) {
-            //         board[lastMove.to.row][lastMove.to.col] = {};
-            //     }
-            // }
             let piece = _board[selectedSquare.row][selectedSquare.col];
             let fromRow = selectedSquare.row;
             let fromCol = selectedSquare.col;
+            let enPassantCapture = boardHistory[boardHistory.length -1].enPassant;
+            if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
+                if (piece.color === 'white'){
+                    console.log('this happened')
+                    board[row + 1][col] = {};
+                } else {
+                    board[row - 1][col] = {};
+                }
+            }
             movePiece(selectedSquare.row, selectedSquare.col, row, col);
             selectedSquare = null;
             if (!pawnPromotion()) {
@@ -819,9 +796,6 @@ function returnEnPassantSquare(piece, fromRow, toRow, col) {
     }
     return null;
 }
-//don't freak out, but if you run this function after pushBoardHistory, it will appear wrong, but it's cuz this actually gets called before boardHistory's latest entry
-//you should do boardHistory[boardHistory length - 2] when you want to call it after pushBoardHistory
-//you should probably fix this to take in a parameter of the player turn properly
 
 let pawnHasMovedStatus = null;
 // global variable
@@ -896,29 +870,30 @@ function movePiece(startRow, startCol, endRow, endCol) {
     }
 }
 
-function validMoves(piece, row, col, _board) {
+function validMoves(piece, row, col, _boardHistory) {
     if (piece.type === 'pawn') {
-        return validPawnMoves(piece, row, col, _board);
+        return validPawnMoves(piece, row, col, _boardHistory);
     }
     if (piece.type === 'rook') {
-        return validRookMoves(piece, row, col, _board);
+        return validRookMoves(piece, row, col, _boardHistory);
     }
     if (piece.type === 'knight') {
-        return validKnightMoves(piece, row, col, _board);
+        return validKnightMoves(piece, row, col, _boardHistory);
     }
     if (piece.type === 'bishop') {
-        return validBishopMoves(piece, row, col, _board);
+        return validBishopMoves(piece, row, col, _boardHistory);
     }
     if (piece.type === 'queen') {
-        return validQueenMoves(piece, row, col, _board);
+        return validQueenMoves(piece, row, col, _boardHistory);
     }
     if (piece.type === 'king') {
-        return validKingMoves(piece, row, col, _board);
+        return validKingMoves(piece, row, col, _boardHistory);
     }
 }
 
-function validPawnMoves(piece, currentRow, currentCol, _board, espq) {
+function validPawnMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
+    let _board = _boardHistory[boardHistory.length - 1].board;
     let direction = (piece.color === 'white') ? -1 : 1;
     if ((piece.color === 'white' && currentRow === 0) || (piece.color === 'black' && currentRow === 7)) {
         return moves;
@@ -939,12 +914,16 @@ function validPawnMoves(piece, currentRow, currentCol, _board, espq) {
         _board[currentRow + direction][currentCol + 1].color !== piece.color) {
         moves.push({ row: currentRow + direction, col: currentCol + 1 });
     }
-    //throw new Error ('i am overwhelemed by espq')
-    // if (returnEnPassantSquare(moveHistoryParam) && currentRow === lastMove.to.row && lastMove) {
-    //     if (currentCol === lastMove.to.col - 1 || currentCol === lastMove.to.col + 1) {
-    //         moves.push({ row: currentRow + direction, col: lastMove.to.col });
-    //     }
-    // }
+    if (_boardHistory[_boardHistory.length - 1].enPassant) {
+        let enPassantRow = _boardHistory[_boardHistory.length - 1].enPassant.row;
+        let enPassantCol = _boardHistory[_boardHistory.length - 1].enPassant.col;
+        if ((piece.color === 'white' && currentRow === 3 && enPassantRow == 2) ||
+        (piece.color === 'black' && currentRow === 4 && enPassantRow == 5)){
+            if (currentCol === enPassantCol - 1 || currentCol === enPassantCol + 1){
+                moves.push({ row: enPassantRow, col: enPassantCol});
+            }
+        }
+    }
     return moves;
 }
 
@@ -1140,8 +1119,9 @@ function equalMoveArrayCheck(array1, array2) {
     return true;
 }
 
-function validRookMoves(piece, currentRow, currentCol, _board) {
+function validRookMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
+    let _board = boardHistory[boardHistory.length - 1].board;
     for (let row = currentRow - 1; row >= 0; row--) {
         if (_board[row][currentCol] && _board[row][currentCol].type) {
             if (_board[row][currentCol].color !== piece.color) {
@@ -1181,8 +1161,9 @@ function validRookMoves(piece, currentRow, currentCol, _board) {
     return moves;
 }
 
-function validKnightMoves(piece, currentRow, currentCol, _board) {
+function validKnightMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
+    let _board = _boardHistory[_boardHistory.length - 1].board;
     let directions = [
         { row: -2, col: -1 },
         { row: -2, col: 1 },
@@ -1208,8 +1189,9 @@ function validKnightMoves(piece, currentRow, currentCol, _board) {
     return moves;
 }
 
-function validBishopMoves(piece, currentRow, currentCol, _board) {
+function validBishopMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
+    let _board = _boardHistory[_boardHistory.length - 1].board;
     let directions = [
         { row: -1, col: -1 },
         { row: -1, col: 1 },
@@ -1233,8 +1215,9 @@ function validBishopMoves(piece, currentRow, currentCol, _board) {
     return moves;
 }
 
-function validQueenMoves(piece, currentRow, currentCol, _board) {
+function validQueenMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
+    let _board = _boardHistory[_boardHistory.length - 1].board;
     let directions = [
         { row: -1, col: -1 },
         { row: -1, col: 0 },
@@ -1263,8 +1246,9 @@ function validQueenMoves(piece, currentRow, currentCol, _board) {
     return moves;
 }
 
-function validKingMoves(piece, currentRow, currentCol, _board) {
+function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
+    let _board = _boardHistory[_boardHistory.length - 1].board;
     let directions = [
         { row: -1, col: -1 },
         { row: -1, col: 0 },
@@ -1997,13 +1981,14 @@ let whiteQueenCheckingWhiteKing = [
     ]
 ]
 
-function isKingInCheckmate(_board) {
-    let simulatedBoard = deepCopyBoard(_board);
+function isKingInCheckmate(_boardHistory) {
+    let simulatedBoardHistory = deepCopyBoardHistory(_boardHistory);
+    let simulatedBoard = simulatedBoardHistory[simulatedBoardHistory.length - 1].board;
     for (let row = 0; row < simulatedBoard.length; row++) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
             if (piece.color === boardHistory[boardHistory.length - 1].playerTurn && piece.type !== undefined) {
-                let moves = validMoves(piece, row, col, simulatedBoard);
+                let moves = validMoves(piece, row, col, simulatedBoardHistory);
                 for (let i = 0; i < moves.length; i++) {
                     let move = moves[i];
                     let simulatedMove = simulatedBoard[move.row][move.col];
@@ -2045,6 +2030,26 @@ function deepCopyBoard(_board) {
         newBoard.push(newRow);
     }
     return newBoard;
+}
+
+function deepCopyBoardHistory(boardHistory) {
+    let newBoardHistory = [];
+    for (let i = 0; i < boardHistory.length; i++) {
+        let history = boardHistory[i];
+        let newHistory = {
+            board: deepCopyBoard(history.board),
+            playerTurn: history.playerTurn,
+            whiteKingCastleStatus: history.whiteKingCastleStatus,
+            whiteQueenCastleStatus: history.whiteQueenCastleStatus,
+            blackKingCastleStatus: history.blackKingCastleStatus,
+            blackQueenCastleStatus: history.blackQueenCastleStatus,
+            enPassant: history.enPassant,
+            halfMoveClock: history.halfMoveClock,
+            fullMoveClock: history.fullMoveClock
+        };
+        newBoardHistory.push(newHistory);
+    }
+    return newBoardHistory;
 }
 // build a test
 
@@ -2115,11 +2120,11 @@ function threefoldRepetitionCheck(_boardHistory) {
     return false;
 }
 
-function isGameInDraw() {
+function isGameInDraw(boardHistory) {
     if (threefoldRepetitionCheck(boardHistory)) {
         return true;
     }
-    if (isStalemate()) {
+    if (isStalemate(boardHistory)) {
         return true;
     }
     if (boardHistory[boardHistory.length - 1].halfMoveClock === 50) {
@@ -2129,15 +2134,16 @@ function isGameInDraw() {
     return false;
 }
 
-function isStalemate() {
-    let simulatedBoard = deepCopyBoard(board);
+function isStalemate(boardHistory) {
+    let simulatedBoardHistory = deepCopyBoardHistory(boardHistory);
+    let simulatedBoard = simulatedBoardHistory[simulatedBoardHistory.length - 1].board;
     let allPlayerMoves = [];
     let latestBoard = boardHistory[boardHistory.length - 1];
     for (let row = 0; row < simulatedBoard.length; row++) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
             if (piece.color === boardHistory[boardHistory.length - 1].playerTurn && piece.type !== undefined) {
-                let moves = spliceSelfCheckingMoves(piece, row, col, validMoves(piece, row, col, simulatedBoard));
+                let moves = spliceSelfCheckingMoves(piece, row, col, validMoves(piece, row, col, simulatedBoardHistory));
                 for (let i = 0; i < moves.length; i++) {
                     allPlayerMoves.push(moves[i]);
                 }
@@ -2151,9 +2157,7 @@ function isStalemate() {
     return false;
 }
 
-let inGameTime = 0;
 function drawGame() {
-    inGameTime++;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(boardHistory[boardHistory.length - 1].board);
     // let testfentoboard = fenToBoard('rnbqkbnr/pppppppp/8/8/6bb/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
@@ -2162,9 +2166,9 @@ function drawGame() {
         bannerFilm();
         drawPawnPromotionBanner();
     }
-    if (isGameInDraw()) {
+    if (isGameInDraw(boardHistory)) {
         console.log("game has ended in a draw!");
-    } else if (isKingInCheckmate(boardHistory[boardHistory.length - 1].board) === true) {
+    } else if (isKingInCheckmate(boardHistory) === true) {
         console.log(invertCurrentPlayerTurn() + " won!")
     }
     else if (isSquareThreatened(boardHistory[boardHistory.length - 1].board, findKingPosition(boardHistory[boardHistory.length - 1].board).row, findKingPosition(boardHistory[boardHistory.length - 1].board).col, boardHistory[boardHistory.length - 1].playerTurn)) {
@@ -2174,7 +2178,17 @@ function drawGame() {
 
 setInterval(drawGame, 16);
 
-//fix validmoves, sub out all board for boardHistory.board
-//fix multiple digit bug in fen translator
-//fix update checkPotential En Passant so it's just a function that returns the epsq
-//remove global variables
+// you need to fix selected square as a global var
+//fix the decoupling of onClick and drawBoard
+//what i think is happening is that we are ref boardHistory and board globally, but you need to make a simulated board within the function and pass that in as an arg for pushBoardHistory
+//fr this is so annoying.
+//remove these global variables
+// let whiteKingHasNotMoved = true;
+// let blackKingHasNotMoved = true;
+// let whiteKingRookHasNotMoved = true;
+// let whiteQueenRookHasNotMoved = true;
+// let blackKingRookHasNotMoved = true;
+// let blackQueenRookHasNotMoved = true;
+
+// let selectedSquare = null;
+// let selectedPieceType = null;
