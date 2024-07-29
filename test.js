@@ -2039,14 +2039,13 @@ let fens = [
 
 function testChessScript(fen) {
     for (let fen of fens) {
-        testFen(fen + ' 0 1');
+        testFen(fen + ' 12 2424');
     }
     testFen('r1bq1rk1/pp2bppp/2n1pn2/2pp4/4P3/3P1NP1/PPPN1PBP/R1BQR1K1 b - - 0 1');
     testFen('rnbqkbnr/pppp2pp/5p2/3Pp3/8/8/PPP1PPPP/RNBQKBNR w KQkq e6 0 3');
     testFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
     testFenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', testerInitialBoard[0].board);
     testBoardToFen();
-    assert(testValidPawnMoves(preEnPassantBoard, preEnPassantMoveHistory) === true, "validPawnMoves is returning an incorrect move array");
     assert(!isSquareThreatened(whiteQueenCheckingWhiteKing, findKingPosition(whiteQueenCheckingWhiteKing).row, findKingPosition(whiteQueenCheckingWhiteKing).col, 'white'), `white Queen is in sight of the White King, it should not return true, but it is! also ${findKingPosition(whiteQueenCheckingWhiteKing).row} + ${findKingPosition(whiteQueenCheckingWhiteKing).col} + ${boardHistory[boardHistory.length - 1].playerTurn}`);
     assert(isSquareThreatened(blackKnightCheckingWhiteKing, findKingPosition(blackKnightCheckingWhiteKing).row, findKingPosition(blackKnightCheckingWhiteKing).col, 'white'), "King should be in check, attacked by black knight!");
     assert(isSquareThreatened(blackQueenCheckingWhiteKing, findKingPosition(blackQueenCheckingWhiteKing).row, findKingPosition(blackQueenCheckingWhiteKing).col, 'white'), "White king should be in check, black queen is attacking!");

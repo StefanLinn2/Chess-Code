@@ -38,7 +38,6 @@ let whiteQueenRookHasNotMoved = true;
 let blackKingRookHasNotMoved = true;
 let blackQueenRookHasNotMoved = true;
 
-let moveHistory = [];
 let selectedSquare = null;
 let selectedPieceType = null;
 
@@ -163,8 +162,8 @@ function fenToBoard(_fen) {
     let blackKingCastleStatus = false;
     let blackQueenCastleStatus = false;
     let enPassant = null;
-    let halfMoveClock = null;
-    let fullMoveClock = null;
+    let halfMoveClock = '';
+    let fullMoveClock = '';
     let rowArray = 0;
     let algoFenAdded = false;
     for (let i = 0; i < _fen.length; i++) {
@@ -255,12 +254,10 @@ function fenToBoard(_fen) {
             }
         }
         if (i > fenSpaceIndex(_fen)[3] && i < fenSpaceIndex(_fen)[4]) {
-            halfMoveClock = parseInt(_fen[i]);
-            //multiple digits 4 digits
+            halfMoveClock += _fen[i];
         }
         if (i > fenSpaceIndex(_fen)[4]) {
-            fullMoveClock = parseInt(_fen[i]);
-            //what happens if 4 digits?
+            fullMoveClock += _fen[i];
         }
     }
     boardHistory.push(
@@ -272,8 +269,8 @@ function fenToBoard(_fen) {
             blackKingCastleStatus: blackKingCastleStatus,
             blackQueenCastleStatus: blackQueenCastleStatus,
             enPassant: enPassant,
-            halfMoveClock: halfMoveClock,
-            fullMoveClock: fullMoveClock,
+            halfMoveClock: parseInt(halfMoveClock),
+            fullMoveClock: parseInt(fullMoveClock),
         })
     return boardHistory;
 }
@@ -417,41 +414,7 @@ let testerInitialBoard = [
     }
 ];
 
-// let board = [
-//     [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
-//     [{ type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'black' }],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{}, {}, {}, {}, {}, {}, {}, {}],
-//     [{ type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }],
-//     [{ type: 'rook', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'queen', color: 'white' }, { type: 'king', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'rook', color: 'white' }]
-// ];
-
 let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-
-// let boardHistory = [
-//     {
-//         board: [
-//             [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
-//             [{ type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'black' }],
-//             [{}, {}, {}, {}, {}, {}, {}, {}],
-//             [{}, {}, {}, {}, {}, {}, {}, {}],
-//             [{}, {}, {}, {}, {}, {}, {}, {}],
-//             [{}, {}, {}, {}, {}, {}, {}, {}],
-//             [{ type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }],
-//             [{ type: 'rook', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'queen', color: 'white' }, { type: 'king', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'rook', color: 'white' }]
-//         ],
-//         playerTurn: 'white',
-//         whiteKingCastleStatus: true,
-//         whiteQueenCastleStatus: true,
-//         blackKingCastleStatus: true,
-//         blackQueenCastleStatus: true,
-//         enPassant: checkPotentialEnPassant(moveHistory),
-//         halfMoveClock: 0,
-//         fullMoveClock: 1,
-//     }
-// ];
 
 let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
 
@@ -638,7 +601,7 @@ function drawBoard(_board) {
         highlightPiece(selectedSquare.row, selectedSquare.col)
     }
     //add logic for highlighting en passant capture, poss refactor
-    let moves = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, board, moveHistory));
+    let moves = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, board));
     if (moves.length === 0) {
         return;
     }
@@ -740,75 +703,6 @@ function pawnPromotion() {
     return false;
 }
 
-//might need to wrap this in a function to make board not ref a global var
-// canvas.addEventListener('click', function (event) {
-//     let col = Math.floor(event.offsetX / block);
-//     let row = Math.floor(event.offsetY / block);
-//     let square = board[row][col];
-//     if (pawnPromotion()) {
-//         let pawnRow = findPawnInEndRow(board).row;
-//         let pawnCol = findPawnInEndRow(board).col;
-//         if (row === 3 || row === 4) {
-//             if (col === 0 || col === 1) {
-//                 board[pawnRow][pawnCol] = { type: 'queen', color: boardHistory[boardHistory.length - 1].playerTurn };
-//                 whitePawnPromotion = false;
-//                 blackPawnPromotion = false;
-//             }
-//             if (col === 2 || col === 3) {
-//                 board[pawnRow][pawnCol] = { type: 'bishop', color: boardHistory[boardHistory.length - 1].playerTurn };
-//                 whitePawnPromotion = false;
-//                 blackPawnPromotion = false;
-//             }
-//             if (col === 4 || col === 5) {
-//                 board[pawnRow][pawnCol] = { type: 'knight', color: boardHistory[boardHistory.length - 1].playerTurn };
-//                 whitePawnPromotion = false;
-//                 blackPawnPromotion = false;
-//             }
-//             if (col === 6 || col === 7) {
-//                 board[pawnRow][pawnCol] = { type: 'rook', color: boardHistory[boardHistory.length - 1].playerTurn };
-//                 whitePawnPromotion = false;
-//                 blackPawnPromotion = false;
-//             }
-//             pushBoardHistory();
-//         }
-//     }
-//     else if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
-//         selectedSquare = null;
-//     } else if (square.type && boardHistory[boardHistory.length - 1].playerTurn === square.color) {
-//         selectedSquare = { row: row, col: col };
-//         selectedPieceType = square.type;
-//     } else if (selectedSquare) {
-//         let validDestinations = spliceSelfCheckingMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, board, moveHistory));
-//         let isDestinationValid = false;
-//         for (let i = 0; i < validDestinations.length; i++) {
-//             if (validDestinations[i].row === row && validDestinations[i].col === col) {
-//                 isDestinationValid = true;
-//                 break;
-//             }
-//         }
-//         if (isDestinationValid) {
-//             let enPassantSquare = checkPotentialEnPassant(moveHistory);
-//             if (enPassantSquare && selectedPieceType === 'pawn') {
-//                 let lastMove = moveHistory[moveHistory.length - 1];
-//                 let behindRow = (boardHistory[boardHistory.length - 1].playerTurn === 'white') ? 2 : 5;
-//                 if (row === behindRow && col === lastMove.to.col) {
-//                     board[lastMove.to.row][lastMove.to.col] = {};
-//                 }
-//             }
-//             movePiece(selectedSquare.row, selectedSquare.col, row, col);
-//             logMovedPiece(selectedSquare.row, selectedSquare.col, row, col, selectedPieceType, square.type);
-//             selectedSquare = null;
-//             if (!pawnPromotion()) {
-//                 pushBoardHistory();
-//             }
-//         }
-//         else {
-//             selectedSquare = null;
-//         }
-//     }
-// }
-// );
-
 function onClick(event) {
     let _board = boardHistory[boardHistory.length - 1].board;
     let col = Math.floor(event.offsetX / block);
@@ -838,7 +732,7 @@ function onClick(event) {
                 whitePawnPromotion = false;
                 blackPawnPromotion = false;
             }
-            pushBoardHistory();
+            pushBoardHistory(null);
         }
     }
     else if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
@@ -847,7 +741,7 @@ function onClick(event) {
         selectedSquare = { row: row, col: col };
         selectedPieceType = square.type;
     } else if (selectedSquare) {
-        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, board, moveHistory));
+        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, board));
         let isDestinationValid = false;
         for (let i = 0; i < validDestinations.length; i++) {
             if (validDestinations[i].row === row && validDestinations[i].col === col) {
@@ -856,19 +750,27 @@ function onClick(event) {
             }
         }
         if (isDestinationValid) {
-            let enPassantSquare = checkPotentialEnPassant(moveHistory);
-            if (enPassantSquare && selectedPieceType === 'pawn') {
-                let lastMove = moveHistory[moveHistory.length - 1];
-                let behindRow = (boardHistory[boardHistory.length - 1].playerTurn === 'white') ? 2 : 5;
-                if (row === behindRow && col === lastMove.to.col) {
-                    board[lastMove.to.row][lastMove.to.col] = {};
-                }
-            }
+            // let enPassantSquare = returnEnPassantSquare(piece, );
+            // if (enPassantSquare && selectedPieceType === 'pawn') {
+            //     let lastMove = moveHistory[moveHistory.length - 1];
+            //     let behindRow = (boardHistory[boardHistory.length - 1].playerTurn === 'white') ? 2 : 5;
+            //     if (row === behindRow && col === lastMove.to.col) {
+            //         board[lastMove.to.row][lastMove.to.col] = {};
+            //     }
+            // }
+            let piece = _board[selectedSquare.row][selectedSquare.col];
+            let fromRow = selectedSquare.row;
+            let fromCol = selectedSquare.col;
             movePiece(selectedSquare.row, selectedSquare.col, row, col);
-            logMovedPiece(selectedSquare.row, selectedSquare.col, row, col, selectedPieceType, square.type);
             selectedSquare = null;
             if (!pawnPromotion()) {
-                pushBoardHistory();
+                if (piece.type === 'pawn') {
+                    let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
+                    console.log(epsq);
+                    pushBoardHistory(epsq);
+                } else {
+                    pushBoardHistory(null)
+                }
             }
         }
         else {
@@ -879,7 +781,7 @@ function onClick(event) {
 
 canvas.addEventListener('click', onClick);
 
-function pushBoardHistory() {
+function pushBoardHistory(epsq) {
     let fullMoveModifier = 0;
     let halfMoveModifier = 0;
     if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
@@ -902,29 +804,18 @@ function pushBoardHistory() {
             whiteQueenCastleStatus: castlingRightsWhiteQueenSide(boardHistory),
             blackKingCastleStatus: castlingRightsBlackKingSide(boardHistory),
             blackQueenCastleStatus: castlingRightsBlackQueenSide(boardHistory),
-            enPassant: checkPotentialEnPassant(moveHistory),
+            enPassant: epsq,
             halfMoveClock: halfMoveModifier,
             fullMoveClock: boardHistory[boardHistory.length - 1].fullMoveClock + fullMoveModifier,
         }
     );
 }
 
-function logMovedPiece(fromRow, fromCol, toRow, toCol, pieceType) {
-    let loggedMove = {
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol },
-        piece: pieceType,
-    };
-    moveHistory.push(loggedMove);
-}
 
-function checkPotentialEnPassant(_moveHistory) {
-    if (_moveHistory.length > 0) {
-        let lastMove = _moveHistory[_moveHistory.length - 1];
-        if (lastMove.piece === 'pawn' && Math.abs(lastMove.from.row - lastMove.to.row) === 2) {
-            let behindRow = (boardHistory[boardHistory.length - 1].playerTurn === 'white') ? lastMove.to.row + 1 : lastMove.to.row - 1;
-            return { row: behindRow, col: lastMove.to.col };
-        }
+function returnEnPassantSquare(piece, fromRow, toRow, col) {
+    if (piece.type === 'pawn' && Math.abs(fromRow - toRow) === 2) {
+        let behindRow = (piece.color === 'white') ? toRow + 1 : toRow - 1;
+        return { row: behindRow, col: col };
     }
     return null;
 }
@@ -933,6 +824,8 @@ function checkPotentialEnPassant(_moveHistory) {
 //you should probably fix this to take in a parameter of the player turn properly
 
 let pawnHasMovedStatus = null;
+// global variable
+// this function below is creating global variables.
 function movePiece(startRow, startCol, endRow, endCol) {
     let endSquare = board[endRow][endCol];
     if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
@@ -1003,9 +896,9 @@ function movePiece(startRow, startCol, endRow, endCol) {
     }
 }
 
-function validMoves(piece, row, col, _board, _moveHistory) {
+function validMoves(piece, row, col, _board) {
     if (piece.type === 'pawn') {
-        return validPawnMoves(piece, row, col, _board, _moveHistory);
+        return validPawnMoves(piece, row, col, _board);
     }
     if (piece.type === 'rook') {
         return validRookMoves(piece, row, col, _board);
@@ -1024,10 +917,9 @@ function validMoves(piece, row, col, _board, _moveHistory) {
     }
 }
 
-function validPawnMoves(piece, currentRow, currentCol, _board, moveHistoryParam) {
+function validPawnMoves(piece, currentRow, currentCol, _board, espq) {
     let moves = [];
     let direction = (piece.color === 'white') ? -1 : 1;
-    let lastMove = moveHistoryParam[moveHistoryParam.length - 1];
     if ((piece.color === 'white' && currentRow === 0) || (piece.color === 'black' && currentRow === 7)) {
         return moves;
     }
@@ -1047,11 +939,12 @@ function validPawnMoves(piece, currentRow, currentCol, _board, moveHistoryParam)
         _board[currentRow + direction][currentCol + 1].color !== piece.color) {
         moves.push({ row: currentRow + direction, col: currentCol + 1 });
     }
-    if (checkPotentialEnPassant(moveHistoryParam) && currentRow === lastMove.to.row && lastMove) {
-        if (currentCol === lastMove.to.col - 1 || currentCol === lastMove.to.col + 1) {
-            moves.push({ row: currentRow + direction, col: lastMove.to.col });
-        }
-    }
+    //throw new Error ('i am overwhelemed by espq')
+    // if (returnEnPassantSquare(moveHistoryParam) && currentRow === lastMove.to.row && lastMove) {
+    //     if (currentCol === lastMove.to.col - 1 || currentCol === lastMove.to.col + 1) {
+    //         moves.push({ row: currentRow + direction, col: lastMove.to.col });
+    //     }
+    // }
     return moves;
 }
 
@@ -1234,65 +1127,6 @@ let preEnPassantBoard = [
     ]
 ]
 
-let preEnPassantMoveHistory = [
-    {
-        "from": {
-            "row": 6,
-            "col": 4
-        },
-        "to": {
-            "row": 4,
-            "col": 4
-        },
-        "piece": "pawn"
-    },
-    {
-        "from": {
-            "row": 0,
-            "col": 1
-        },
-        "to": {
-            "row": 2,
-            "col": 0
-        },
-        "piece": "knight"
-    },
-    {
-        "from": {
-            "row": 4,
-            "col": 4
-        },
-        "to": {
-            "row": 3,
-            "col": 4
-        },
-        "piece": "pawn"
-    },
-    {
-        "from": {
-            "row": 1,
-            "col": 3
-        },
-        "to": {
-            "row": 3,
-            "col": 3
-        },
-        "piece": "pawn"
-    }
-]
-
-function testValidPawnMoves(boardParam, moveHistoryParam) {
-    let correctEnPassantMoveArray = [
-        { row: 2, col: 4 },
-        { row: 2, col: 3 }
-    ];
-    let correctFirstPawnMoveArray = [
-        { row: 5, col: 6 },
-        { row: 4, col: 6 },
-    ]
-    return (equalMoveArrayCheck(validPawnMoves(boardParam[3][4], 3, 4, boardParam, moveHistoryParam), correctEnPassantMoveArray) && equalMoveArrayCheck(validPawnMoves(preEnPassantBoard[6][6], 6, 6, boardParam, preEnPassantMoveHistory), correctFirstPawnMoveArray));
-
-}
 
 function equalMoveArrayCheck(array1, array2) {
     if (array1.length !== array2.length) {
@@ -2169,7 +2003,7 @@ function isKingInCheckmate(_board) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
             if (piece.color === boardHistory[boardHistory.length - 1].playerTurn && piece.type !== undefined) {
-                let moves = validMoves(piece, row, col, simulatedBoard, moveHistory);
+                let moves = validMoves(piece, row, col, simulatedBoard);
                 for (let i = 0; i < moves.length; i++) {
                     let move = moves[i];
                     let simulatedMove = simulatedBoard[move.row][move.col];
@@ -2303,7 +2137,7 @@ function isStalemate() {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
             if (piece.color === boardHistory[boardHistory.length - 1].playerTurn && piece.type !== undefined) {
-                let moves = spliceSelfCheckingMoves(piece, row, col, validMoves(piece, row, col, simulatedBoard, moveHistory));
+                let moves = spliceSelfCheckingMoves(piece, row, col, validMoves(piece, row, col, simulatedBoard));
                 for (let i = 0; i < moves.length; i++) {
                     allPlayerMoves.push(moves[i]);
                 }
@@ -2340,4 +2174,7 @@ function drawGame() {
 
 setInterval(drawGame, 16);
 
-//build like 827383 tests
+//fix validmoves, sub out all board for boardHistory.board
+//fix multiple digit bug in fen translator
+//fix update checkPotential En Passant so it's just a function that returns the epsq
+//remove global variables
