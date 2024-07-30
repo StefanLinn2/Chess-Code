@@ -30,19 +30,12 @@ function invertCurrentPlayerTurn() {
     }
 }
 
-//fuck, these are global variables
-let whiteKingHasNotMoved = true;
-let blackKingHasNotMoved = true;
-let whiteKingRookHasNotMoved = true;
-let whiteQueenRookHasNotMoved = true;
-let blackKingRookHasNotMoved = true;
-let blackQueenRookHasNotMoved = true;
-
 let promotionSelected = false;
 let whitePawnPromotion = false;
 let blackPawnPromotion = false;
 let selectedSquare = null;
 let selectedPieceType = null;
+
 let pawnHasMovedStatus = null;
 
 let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
@@ -681,7 +674,6 @@ function pawnPromotion() {
 
 function onClick(event) {
     let _board = boardHistory[boardHistory.length - 1].board;
-    //let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
     let col = Math.floor(event.offsetX / block);
     let row = Math.floor(event.offsetY / block);
     let square = _board[row][col];
@@ -2244,15 +2236,11 @@ setInterval(drawGame, 16);
 //fr this is so annoying.
 
 //remove these global variables
-//fix castling shit for when pawn promotion captures a rook
-//clean up castling nested stuff
-//fix castlign in validKingMoves
-// let whiteKingHasNotMoved = true;
-// let blackKingHasNotMoved = true;
-// let whiteKingRookHasNotMoved = true;
-// let whiteQueenRookHasNotMoved = true;
-// let blackKingRookHasNotMoved = true;
-// let blackQueenRookHasNotMoved = true;
+//pawnHasMovedStatus
+//capturedPieceStatus
+//you can just pass it through move piece function into push board history
+//like you did with castling updates
+
 
 //these might be ok?
 // let selectedSquare = null;
