@@ -38,8 +38,15 @@ let whiteQueenRookHasNotMoved = true;
 let blackKingRookHasNotMoved = true;
 let blackQueenRookHasNotMoved = true;
 
+let promotionSelected = false;
+let whitePawnPromotion = false;
+let blackPawnPromotion = false;
 let selectedSquare = null;
 let selectedPieceType = null;
+let pawnHasMovedStatus = null;
+
+let boardHistory = fenToBoard('rnbqkbnr/pPppppPp/8/8/p7/8/PpPPPPpP/RNBQKBNR w KQkq - 0 1')
+let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -413,10 +420,6 @@ let testerInitialBoard = [
     }
 ];
 
-let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/p7/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-
-let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
-
 
 let blackPawnCheckingWhiteKing = [
     [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
@@ -506,9 +509,6 @@ let pieceSprites = [
 
 let whitePawnPromotionBanner = { x: 320, y: 0, w: 1280, h: 320 };
 let blackPawnPromotionBanner = { x: 320, y: 320, w: 1280, h: 320 };
-let promotionSelected = false;
-let whitePawnPromotion = false;
-let blackPawnPromotion = false;
 
 function drawPawnPromotionBanner() {
     if (whitePawnPromotion) {
@@ -681,12 +681,35 @@ function pawnPromotion() {
 
 function onClick(event) {
     let _board = boardHistory[boardHistory.length - 1].board;
+    //let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
     let col = Math.floor(event.offsetX / block);
     let row = Math.floor(event.offsetY / block);
     let square = _board[row][col];
     if (pawnPromotion()) {
+        let castlingUpdate = {
+            whiteKing: boardHistory[boardHistory.length - 1].whiteKingCastleStatus,
+            whiteQueen: boardHistory[boardHistory.length - 1].whiteQueenCastleStatus,
+            blackKing: boardHistory[boardHistory.length - 1].blackKingCastleStatus,
+            blackQueen: boardHistory[boardHistory.length - 1].blackQueenCastleStatus,
+        }
         let pawnRow = findPawnInEndRow(board).row;
         let pawnCol = findPawnInEndRow(board).col;
+        if (pawnRow === 0){
+            if (pawnCol === 7){
+                castlingUpdate.blackKing = false;
+            }
+            if (pawnCol === 0){
+                castlingUpdate.blackQueen = false;
+            }
+        }
+        if (pawnRow === 7){
+            if (pawnCol === 7){
+                castlingUpdate.whiteKing = false;
+            }
+            if (pawnCol === 0){
+                castlingUpdate.whiteQueen = false;
+            }
+        }
         if (row === 3 || row === 4) {
             if (col === 0 || col === 1) {
                 board[pawnRow][pawnCol] = { type: 'queen', color: boardHistory[boardHistory.length - 1].playerTurn };
@@ -708,57 +731,97 @@ function onClick(event) {
                 whitePawnPromotion = false;
                 blackPawnPromotion = false;
             }
-            pushBoardHistory(null);
+            pushBoardHistory(null, castlingUpdate);
         }
     }
-    else if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
-        selectedSquare = null;
-    } else if (square.type && boardHistory[boardHistory.length - 1].playerTurn === square.color) {
-        selectedSquare = { row: row, col: col };
-        selectedPieceType = square.type;
-    } else if (selectedSquare) {
-        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory));
-        let isDestinationValid = false;
-        for (let i = 0; i < validDestinations.length; i++) {
-            if (validDestinations[i].row === row && validDestinations[i].col === col) {
-                isDestinationValid = true;
-                break;
-            }
-        }
-        if (isDestinationValid) {
-            let piece = _board[selectedSquare.row][selectedSquare.col];
-            let fromRow = selectedSquare.row;
-            let fromCol = selectedSquare.col;
-            let enPassantCapture = boardHistory[boardHistory.length -1].enPassant;
-            if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
-                if (piece.color === 'white'){
-                    console.log('this happened')
-                    board[row + 1][col] = {};
-                } else {
-                    board[row - 1][col] = {};
+    else
+        if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
+            selectedSquare = null;
+        } else if (square.type && boardHistory[boardHistory.length - 1].playerTurn === square.color) {
+            selectedSquare = { row: row, col: col };
+            selectedPieceType = square.type;
+        } else if (selectedSquare) {
+            let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory));
+            let isDestinationValid = false;
+            for (let i = 0; i < validDestinations.length; i++) {
+                if (validDestinations[i].row === row && validDestinations[i].col === col) {
+                    isDestinationValid = true;
+                    break;
                 }
             }
-            movePiece(selectedSquare.row, selectedSquare.col, row, col);
-            selectedSquare = null;
-            if (!pawnPromotion()) {
-                if (piece.type === 'pawn') {
-                    let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
-                    console.log(epsq);
-                    pushBoardHistory(epsq);
-                } else {
-                    pushBoardHistory(null)
+            if (isDestinationValid) {
+                let piece = _board[selectedSquare.row][selectedSquare.col];
+                let fromRow = selectedSquare.row;
+                let fromCol = selectedSquare.col;
+                let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
+                if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
+                    if (piece.color === 'white') {
+                        board[row + 1][col] = {};
+                    } else {
+                        board[row - 1][col] = {};
+                    }
                 }
+                movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory);
+                selectedSquare = null;
+                if (!pawnPromotion()) {
+                    let castlingUpdate = {
+                        whiteKing: boardHistory[boardHistory.length - 1].whiteKingCastleStatus,
+                        whiteQueen: boardHistory[boardHistory.length - 1].whiteQueenCastleStatus,
+                        blackKing: boardHistory[boardHistory.length - 1].blackKingCastleStatus,
+                        blackQueen: boardHistory[boardHistory.length - 1].blackQueenCastleStatus,
+                    }
+                    if (piece.type === 'pawn') {
+                        let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
+                        pushBoardHistory(epsq, castlingUpdate);
+                    } else {
+                        castlingUpdate = updateCastlingStatus(piece, fromRow, fromCol, boardHistory);
+                        pushBoardHistory(null, castlingUpdate)
+                    }
+                }
+            } else {
+                selectedSquare = null;
             }
         }
-        else {
-            selectedSquare = null;
-        }
-    }
 }
 
 canvas.addEventListener('click', onClick);
 
-function pushBoardHistory(epsq) {
+function updateCastlingStatus(piece, fromRow, fromCol, boardHistory){
+    let lastState = boardHistory[boardHistory.length -1];
+    let castlingUpdate = {
+        whiteKing: lastState.whiteKingCastleStatus,
+        whiteQueen: lastState.whiteQueenCastleStatus,
+        blackKing: lastState.blackKingCastleStatus,
+        blackQueen: lastState.blackQueenCastleStatus,
+    };
+    if (piece.type === 'king') {
+        if (piece.color === 'white') {
+            castlingUpdate.whiteKing = false;
+            castlingUpdate.whiteQueen = false;
+        } else {
+            castlingUpdate.blackKing = false;
+            castlingUpdate.blackQueen = false;
+        }
+    } else if (piece.type === 'rook') {
+        if (piece.color === 'white') {
+            if (fromRow === 7 && fromCol === 7) {
+                castlingUpdate.whiteKing = false;
+            } else if (fromRow === 7 && fromCol === 0) {
+                castlingUpdate.whiteQueen = false;
+            }
+        } else if (piece.color === 'black') {
+            if (fromRow === 0 && fromCol === 0) {
+                castlingUpdate.blackQueen = false;
+            } else if (fromRow === 0 && fromCol === 7) {
+                castlingUpdate.blackKing = false;
+            }
+        }
+    }
+    return castlingUpdate;
+}
+
+
+function pushBoardHistory(epsq, castlingUpdate) {
     let fullMoveModifier = 0;
     let halfMoveModifier = 0;
     if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
@@ -777,15 +840,16 @@ function pushBoardHistory(epsq) {
         {
             board: deepCopyBoard(board),
             playerTurn: invertCurrentPlayerTurn(),
-            whiteKingCastleStatus: castlingRightsWhiteKingSide(boardHistory),
-            whiteQueenCastleStatus: castlingRightsWhiteQueenSide(boardHistory),
-            blackKingCastleStatus: castlingRightsBlackKingSide(boardHistory),
-            blackQueenCastleStatus: castlingRightsBlackQueenSide(boardHistory),
+            whiteKingCastleStatus: castlingUpdate.whiteKing,
+            whiteQueenCastleStatus: castlingUpdate.whiteQueen,
+            blackKingCastleStatus: castlingUpdate.blackKing,
+            blackQueenCastleStatus: castlingUpdate.blackQueen,
             enPassant: epsq,
             halfMoveClock: halfMoveModifier,
             fullMoveClock: boardHistory[boardHistory.length - 1].fullMoveClock + fullMoveModifier,
         }
     );
+    console.log(boardHistory);
 }
 
 
@@ -797,10 +861,8 @@ function returnEnPassantSquare(piece, fromRow, toRow, col) {
     return null;
 }
 
-let pawnHasMovedStatus = null;
-// global variable
 // this function below is creating global variables.
-function movePiece(startRow, startCol, endRow, endCol) {
+function movePiece(startRow, startCol, endRow, endCol, boardHistory) {
     let endSquare = board[endRow][endCol];
     if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
         capturedPieceStatus = true;
@@ -918,9 +980,9 @@ function validPawnMoves(piece, currentRow, currentCol, _boardHistory) {
         let enPassantRow = _boardHistory[_boardHistory.length - 1].enPassant.row;
         let enPassantCol = _boardHistory[_boardHistory.length - 1].enPassant.col;
         if ((piece.color === 'white' && currentRow === 3 && enPassantRow == 2) ||
-        (piece.color === 'black' && currentRow === 4 && enPassantRow == 5)){
-            if (currentCol === enPassantCol - 1 || currentCol === enPassantCol + 1){
-                moves.push({ row: enPassantRow, col: enPassantCol});
+            (piece.color === 'black' && currentRow === 4 && enPassantRow == 5)) {
+            if (currentCol === enPassantCol - 1 || currentCol === enPassantCol + 1) {
+                moves.push({ row: enPassantRow, col: enPassantCol });
             }
         }
     }
@@ -1314,12 +1376,9 @@ function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
 }
 
 function castlingRightsWhiteKingSide(_boardHistory) {
-    if (_boardHistory.length > 0 && _boardHistory[_boardHistory.length - 1].castlingRightsWhiteKingSide) {
-        return (whiteKingHasNotMoved && whiteKingRookHasNotMoved);
-    } else {
-        return false;
-    };
-}
+    return (_boardHistory[_boardHistory.length - 1].whiteKingCastleStatus);
+};
+
 let whiteCanCastleKingSideBoard = [
     [
         {
@@ -1498,7 +1557,7 @@ let whiteCanCastleKingSideBoard = [
         }
     ]
 ]
-
+//this is wrong as shit
 function castlingRightsWhiteQueenSide(_boardHistory) {
     if (_boardHistory.length > 0 && _boardHistory[_boardHistory.length - 1].castlingRightsWhiteQueenSide) {
         return (
@@ -1689,9 +1748,7 @@ let whiteCanCastleQueenSideBoard = [
     ]
 ]
 
-//assert(castlingRightsWhiteQueenSide(whiteCanCastleQueenSideBoard, 'white'), 'neither K or QR has moved, so you should be able to castle');
-//this is testing canCastle 
-
+//this is wrong as shit
 function castlingRightsBlackKingSide(_boardHistory) {
     if (_boardHistory.length > 0 && _boardHistory[_boardHistory.length - 1].castlingRightsBlackKingSide) {
         return (
@@ -1701,6 +1758,8 @@ function castlingRightsBlackKingSide(_boardHistory) {
         return false;
     }
 }
+
+//this is wrong as shit
 function castlingRightsBlackQueenSide(_boardHistory) {
     if (_boardHistory.length > 0 && _boardHistory[_boardHistory.length - 1].castlingRightsWhiteQueenSide) {
         return (
@@ -2178,11 +2237,14 @@ function drawGame() {
 
 setInterval(drawGame, 16);
 
-// you need to fix selected square as a global var
-//fix the decoupling of onClick and drawBoard
+
 //what i think is happening is that we are ref boardHistory and board globally, but you need to make a simulated board within the function and pass that in as an arg for pushBoardHistory
 //fr this is so annoying.
+
 //remove these global variables
+//fix castling shit for when pawn promotion captures a rook
+//clean up castling nested stuff
+//fix castlign in validKingMoves
 // let whiteKingHasNotMoved = true;
 // let blackKingHasNotMoved = true;
 // let whiteKingRookHasNotMoved = true;
@@ -2190,5 +2252,6 @@ setInterval(drawGame, 16);
 // let blackKingRookHasNotMoved = true;
 // let blackQueenRookHasNotMoved = true;
 
+//these might be ok?
 // let selectedSquare = null;
 // let selectedPieceType = null;
