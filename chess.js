@@ -45,7 +45,7 @@ let selectedSquare = null;
 let selectedPieceType = null;
 let pawnHasMovedStatus = null;
 
-let boardHistory = fenToBoard('rnbqkbnr/pPppppPp/8/8/p7/8/PpPPPPpP/RNBQKBNR w KQkq - 0 1')
+let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
 
 function algorithmicToRowCol(algoString) {
@@ -694,19 +694,19 @@ function onClick(event) {
         }
         let pawnRow = findPawnInEndRow(board).row;
         let pawnCol = findPawnInEndRow(board).col;
-        if (pawnRow === 0){
-            if (pawnCol === 7){
+        if (pawnRow === 0) {
+            if (pawnCol === 7) {
                 castlingUpdate.blackKing = false;
             }
-            if (pawnCol === 0){
+            if (pawnCol === 0) {
                 castlingUpdate.blackQueen = false;
             }
         }
-        if (pawnRow === 7){
-            if (pawnCol === 7){
+        if (pawnRow === 7) {
+            if (pawnCol === 7) {
                 castlingUpdate.whiteKing = false;
             }
-            if (pawnCol === 0){
+            if (pawnCol === 0) {
                 castlingUpdate.whiteQueen = false;
             }
         }
@@ -786,8 +786,8 @@ function onClick(event) {
 
 canvas.addEventListener('click', onClick);
 
-function updateCastlingStatus(piece, fromRow, fromCol, boardHistory){
-    let lastState = boardHistory[boardHistory.length -1];
+function updateCastlingStatus(piece, fromRow, fromCol, boardHistory) {
+    let lastState = boardHistory[boardHistory.length - 1];
     let castlingUpdate = {
         whiteKing: lastState.whiteKingCastleStatus,
         whiteQueen: lastState.whiteQueenCastleStatus,
@@ -1310,7 +1310,8 @@ function validQueenMoves(piece, currentRow, currentCol, _boardHistory) {
 
 function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
-    let _board = _boardHistory[_boardHistory.length - 1].board;
+    let lastState = _boardHistory[boardHistory.length - 1];
+    let _board = lastState.board;
     let directions = [
         { row: -1, col: -1 },
         { row: -1, col: 0 },
@@ -1321,8 +1322,7 @@ function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
         { row: 1, col: 0 },
         { row: 1, col: 1 }
     ];
-    for (let i = 0; i < directions.length; i++) {
-        let dir = directions[i];
+    for (let dir of directions) {
         let newRow = currentRow + dir.row;
         let newCol = currentCol + dir.col;
         if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
@@ -1332,40 +1332,42 @@ function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
             }
         }
     }
-    if (boardHistory[boardHistory.length - 1].playerTurn === 'white') {
-        if (castlingRightsWhiteKingSide(boardHistory) &&
-            !isSquareThreatened(_board, 7, 4, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 7, 5, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 7, 6, boardHistory[boardHistory.length - 1].playerTurn) &&
+    if (lastState.playerTurn === 'white') {
+
+        if (lastState.whiteKingCastleStatus &&
+            !isSquareThreatened(_board, 7, 4, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 7, 5, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 7, 6, lastState.playerTurn) &&
             _board[7][5].type === undefined &&
             _board[7][6].type === undefined) {
             moves.push({ row: 7, col: 6 });
         }
-        if (castlingRightsWhiteQueenSide(boardHistory) &&
-            !isSquareThreatened(board, 7, 4, _board, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 7, 3, _board, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 7, 2, _board, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 7, 1, _board, boardHistory[boardHistory.length - 1].playerTurn) &&
+        if (lastState.whiteQueenCastleStatus &&
+            !isSquareThreatened(_board, 7, 4, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 7, 3, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 7, 2, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 7, 1, lastState.playerTurn) &&
             _board[7][3].type === undefined &&
             _board[7][2].type === undefined &&
-            _board[7][1].type === undefined) {
+            _board[7][1].type === undefined
+        ) {
             moves.push({ row: 7, col: 2 });
         }
     }
-    if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
-        if (castlingRightsBlackKingSide(boardHistory) &&
-            !isSquareThreatened(_board, 0, 4, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 0, 5, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 0, 6, boardHistory[boardHistory.length - 1].playerTurn) &&
+    if (lastState.playerTurn === 'black') {
+        if (lastState.blackKingCastleStatus &&
+            !isSquareThreatened(_board, 0, 4, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 0, 5, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 0, 6, lastState.playerTurn) &&
             _board[0][5].type === undefined &&
             _board[0][6].type === undefined) {
             moves.push({ row: 0, col: 6 });
         }
-        if (castlingRightsBlackQueenSide(boardHistory) &&
-            !isSquareThreatened(board, 0, 4, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 0, 3, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 0, 2, boardHistory[boardHistory.length - 1].playerTurn) &&
-            !isSquareThreatened(_board, 0, 1, boardHistory[boardHistory.length - 1].playerTurn) &&
+        if (lastState.blackQueenCastleStatus &&
+            !isSquareThreatened(board, 0, 4, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 0, 3, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 0, 2, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 0, 1, lastState.playerTurn) &&
             _board[0][3].type === undefined &&
             _board[0][2].type === undefined &&
             _board[0][1].type === undefined) {
