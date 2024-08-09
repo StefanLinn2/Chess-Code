@@ -3,6 +3,7 @@
 function legalMoves(board) {
     //returns an array of moves for currentPlayerTurn
     //inclusive of piece for square collision?
+    //pawn promotion will be a series of (4) moves
 }
 
 function playMove(board, move) {

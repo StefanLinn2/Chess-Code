@@ -36,8 +36,6 @@ let blackPawnPromotion = false;
 let selectedSquare = null;
 let selectedPieceType = null;
 
-let pawnHasMovedStatus = null;
-
 let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
 
@@ -413,7 +411,6 @@ let testerInitialBoard = [
     }
 ];
 
-
 let blackPawnCheckingWhiteKing = [
     [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
     [{ type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }],
@@ -723,7 +720,7 @@ function onClick(event) {
                 whitePawnPromotion = false;
                 blackPawnPromotion = false;
             }
-            pushBoardHistory(null, castlingUpdate);
+            pushBoardHistory(null, castlingUpdate, false);
         }
     }
     else
@@ -745,7 +742,24 @@ function onClick(event) {
                 let piece = _board[selectedSquare.row][selectedSquare.col];
                 let fromRow = selectedSquare.row;
                 let fromCol = selectedSquare.col;
+                let pawnHasMovedStatus = null;
+                let capturedPieceStatus = null;
                 let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
+                let endSquare = _board[row][col];
+                let halfMoveClockReset = null;
+                if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
+                    capturedPieceStatus = true;
+                } else {
+                    capturedPieceStatus = false;
+                }
+                if (piece.type === 'pawn') {
+                    pawnHasMovedStatus = true;
+                } else {
+                    pawnHasMovedStatus = false;
+                }
+                if (capturedPieceStatus || pawnHasMovedStatus) {
+                    halfMoveClockReset = true;
+                }
                 if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
                     if (piece.color === 'white') {
                         board[row + 1][col] = {};
@@ -764,10 +778,10 @@ function onClick(event) {
                     }
                     if (piece.type === 'pawn') {
                         let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
-                        pushBoardHistory(epsq, castlingUpdate);
+                        pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset);
                     } else {
                         castlingUpdate = updateCastlingStatus(piece, fromRow, fromCol, boardHistory);
-                        pushBoardHistory(null, castlingUpdate)
+                        pushBoardHistory(null, castlingUpdate, halfMoveClockReset)
                     }
                 }
             } else {
@@ -812,8 +826,7 @@ function updateCastlingStatus(piece, fromRow, fromCol, boardHistory) {
     return castlingUpdate;
 }
 
-
-function pushBoardHistory(epsq, castlingUpdate) {
+function pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset) {
     let fullMoveModifier = 0;
     let halfMoveModifier = 0;
     if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
@@ -822,10 +835,9 @@ function pushBoardHistory(epsq, castlingUpdate) {
     else {
         fullMoveModifier = 0;
     }
-    if (capturedPieceStatus || pawnHasMovedStatus) {
+    if (halfMoveClockReset) {
         halfMoveModifier = 0;
-    }
-    else {
+    } else {
         halfMoveModifier = boardHistory[boardHistory.length - 1].halfMoveClock + 1;
     }
     boardHistory.push(
@@ -841,9 +853,7 @@ function pushBoardHistory(epsq, castlingUpdate) {
             fullMoveClock: boardHistory[boardHistory.length - 1].fullMoveClock + fullMoveModifier,
         }
     );
-    console.log(boardHistory);
 }
-
 
 function returnEnPassantSquare(piece, fromRow, toRow, col) {
     if (piece.type === 'pawn' && Math.abs(fromRow - toRow) === 2) {
@@ -853,20 +863,8 @@ function returnEnPassantSquare(piece, fromRow, toRow, col) {
     return null;
 }
 
-// this function below is creating global variables.
 function movePiece(startRow, startCol, endRow, endCol, boardHistory) {
-    let endSquare = board[endRow][endCol];
-    if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
-        capturedPieceStatus = true;
-    } else {
-        capturedPieceStatus = false;
-    }
     let piece = board[startRow][startCol];
-    if (piece.type === 'pawn') {
-        pawnHasMovedStatus = true;
-    } else {
-        pawnHasMovedStatus = false;
-    }
     if (piece.type === 'king' && (endCol - startCol === 2)) {
         if (boardHistory[boardHistory.length - 1].playerTurn === 'white') {
             board[endRow][endCol] = piece;
@@ -1369,401 +1367,6 @@ function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
     return moves;
 }
 
-function castlingRightsWhiteKingSide(_boardHistory) {
-    return (_boardHistory[_boardHistory.length - 1].whiteKingCastleStatus);
-};
-
-let whiteCanCastleKingSideBoard = [
-    [
-        {
-            "type": "rook",
-            "color": "black"
-        },
-        {
-            "type": "knight",
-            "color": "black"
-        },
-        {
-            "type": "bishop",
-            "color": "black"
-        },
-        {
-            "type": "queen",
-            "color": "black"
-        },
-        {
-            "type": "king",
-            "color": "black"
-        },
-        {
-            "type": "bishop",
-            "color": "black"
-        },
-        {},
-        {
-            "type": "rook",
-            "color": "black"
-        }
-    ],
-    [
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        }
-    ],
-    [
-        {},
-        {},
-        {},
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "knight",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {}
-    ],
-    [
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {
-            "type": "bishop",
-            "color": "white"
-        },
-        {},
-        {},
-        {},
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {},
-        {},
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "knight",
-            "color": "white"
-        },
-        {},
-        {}
-    ],
-    [
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {},
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        }
-    ],
-    [
-        {
-            "type": "rook",
-            "color": "white"
-        },
-        {
-            "type": "knight",
-            "color": "white"
-        },
-        {
-            "type": "bishop",
-            "color": "white"
-        },
-        {
-            "type": "queen",
-            "color": "white"
-        },
-        {
-            "type": "king",
-            "color": "white"
-        },
-        {},
-        {},
-        {
-            "type": "rook",
-            "color": "white"
-        }
-    ]
-]
-//this is wrong as shit
-function castlingRightsWhiteQueenSide(_boardHistory) {
-    if (_boardHistory.length > 0 && _boardHistory[_boardHistory.length - 1].castlingRightsWhiteQueenSide) {
-        return (
-            whiteKingHasNotMoved && whiteQueenRookHasNotMoved
-        )
-    } else {
-        return false;
-    }
-
-}
-
-let whiteCanCastleQueenSideBoard = [
-    [
-        {
-            "type": "rook",
-            "color": "black"
-        },
-        {
-            "type": "knight",
-            "color": "black"
-        },
-        {
-            "type": "bishop",
-            "color": "black"
-        },
-        {
-            "type": "queen",
-            "color": "black"
-        },
-        {
-            "type": "king",
-            "color": "black"
-        },
-        {},
-        {
-            "type": "knight",
-            "color": "black"
-        },
-        {
-            "type": "rook",
-            "color": "black"
-        }
-    ],
-    [
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "bishop",
-            "color": "black"
-        },
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        }
-    ],
-    [
-        {},
-        {},
-        {},
-        {},
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {},
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {},
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {},
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {},
-        {},
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {
-            "type": "knight",
-            "color": "white"
-        },
-        {
-            "type": "queen",
-            "color": "white"
-        },
-        {
-            "type": "bishop",
-            "color": "white"
-        },
-        {},
-        {},
-        {}
-    ],
-    [
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {},
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        }
-    ],
-    [
-        {
-            "type": "rook",
-            "color": "white"
-        },
-        {},
-        {},
-        {},
-        {
-            "type": "king",
-            "color": "white"
-        },
-        {
-            "type": "bishop",
-            "color": "white"
-        },
-        {
-            "type": "knight",
-            "color": "white"
-        },
-        {
-            "type": "rook",
-            "color": "white"
-        }
-    ]
-]
-
-//this is wrong as shit
-function castlingRightsBlackKingSide(_boardHistory) {
-    if (_boardHistory.length > 0 && _boardHistory[_boardHistory.length - 1].castlingRightsBlackKingSide) {
-        return (
-            blackKingHasNotMoved && blackKingRookHasNotMoved
-        )
-    } else {
-        return false;
-    }
-}
-
-//this is wrong as shit
-function castlingRightsBlackQueenSide(_boardHistory) {
-    if (_boardHistory.length > 0 && _boardHistory[_boardHistory.length - 1].castlingRightsWhiteQueenSide) {
-        return (
-            blackKingHasNotMoved && blackQueenRookHasNotMoved
-        )
-    } else {
-        return false;
-    }
-}
-
 function findKingPosition(_board) {
     for (let row = 0; row < _board.length; row++) {
         for (let col = 0; col < _board[row].length; col++) {
@@ -2213,8 +1816,6 @@ function isStalemate(boardHistory) {
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(boardHistory[boardHistory.length - 1].board);
-    // let testfentoboard = fenToBoard('rnbqkbnr/pppppppp/8/8/6bb/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-    // drawBoard(testfentoboard[testfentoboard.length - 1].board);
     if (whitePawnPromotion || blackPawnPromotion) {
         bannerFilm();
         drawPawnPromotionBanner();
@@ -2230,18 +1831,3 @@ function drawGame() {
 };
 
 setInterval(drawGame, 16);
-
-
-//what i think is happening is that we are ref boardHistory and board globally, but you need to make a simulated board within the function and pass that in as an arg for pushBoardHistory
-//fr this is so annoying.
-
-//remove these global variables
-//pawnHasMovedStatus
-//capturedPieceStatus
-//you can just pass it through move piece function into push board history
-//like you did with castling updates
-
-
-//these might be ok?
-// let selectedSquare = null;
-// let selectedPieceType = null;
