@@ -1,6 +1,5 @@
 function testFenToBoard(fen, expectedBoard) {
     let testBoard = fenToBoard(fen);
-    console.log(testBoard);
     assert(areBoardsEqual(testBoard[0].board, expectedBoard), 'the boards should be equal');
     assert(testBoard[0].playerTurn === 'white', 'player turn should be white');
     assert(testBoard[0].whiteKingCastleStatus === true, 'whiteKingCastleStatus should be true')
