@@ -7,7 +7,7 @@ function testFenToBoard(fen, expectedBoard) {
 
 function testBoardToFen() {
     let fen = boardToFen(boardHistory[boardHistory.length - 1]);
-    console.log(fen);
+    //console.log(fen);
 }
 
 function testFen(fen) {

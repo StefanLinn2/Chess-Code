@@ -649,7 +649,7 @@ function pawnPromotion() {
     return false;
 }
 
-function promotionSelected(row, col){
+function promotionSelected(row, col) {
     let promotionType = null;
     if (row === 3 || row === 4) {
         if (col >= 0 && col <= 1) {
@@ -683,19 +683,19 @@ function onClick(event) {
             whitePawnPromotion = false;
             blackPawnPromotion = false;
             let halfMoveClockReset = true;
-            if (selectedMove.row === 0){
-                if (selectedMove.col === 0){
+            if (selectedMove.row === 0) {
+                if (selectedMove.col === 0) {
                     castlingUpdate.blackQueen = false;
                 }
-                if (selectedMove.col === 7){
+                if (selectedMove.col === 7) {
                     castlingUpdate.blackKing = false;
                 }
             }
-            if (selectedMove.row === 7){
-                if (selectedMove.col === 0){
+            if (selectedMove.row === 7) {
+                if (selectedMove.col === 0) {
                     castlingUpdate.whiteQueen = false;
                 }
-                if (selectedMove.col === 7){
+                if (selectedMove.col === 7) {
                     castlingUpdate.whiteKing = false;
                 }
             }
@@ -705,79 +705,79 @@ function onClick(event) {
         }
         return;
     } else
-    if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
-        selectedSquare = null;
-    } else if (square.type && boardHistory[boardHistory.length - 1].playerTurn === square.color) {
-        selectedSquare = { row: row, col: col };
-        selectedPieceType = square.type;
-    } else if (selectedSquare) {
-        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory), boardHistory);
-        for (let i = 0; i < validDestinations.length; i++) {
-            if (validDestinations[i].row === row && validDestinations[i].col === col) {
-                selectedMove = validDestinations[i];
-                break;
-            }
-        }
-        if (selectedMove) {
-            let piece = _board[selectedSquare.row][selectedSquare.col];
-            let fromRow = selectedSquare.row;
-            let fromCol = selectedSquare.col;
-            let pawnHasMovedStatus = null;
-            let capturedPieceStatus = null;
-            let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
-            let endSquare = _board[row][col];
-            let halfMoveClockReset = null;
-            let promotion = null;
-            if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
-                capturedPieceStatus = true;
-            } else {
-                capturedPieceStatus = false;
-            }
-            if (piece.type === 'pawn') {
-                pawnHasMovedStatus = true;
-            } else {
-                pawnHasMovedStatus = false;
-            }
-            if (capturedPieceStatus || pawnHasMovedStatus) {
-                halfMoveClockReset = true;
-            }
-            if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
-                if (piece.color === 'white') {
-                    board[row + 1][col] = {};
-                } else {
-                    board[row - 1][col] = {};
-                }
-            }
-            if (selectedMove.promotion) {
-                if (selectedMove.row === 0) {
-                    whitePawnPromotion = true;
-                    blackPawnPromotion = false;
-                    return;
-                } else if (selectedMove.row === 7) {
-                    whitePawnPromotion = false;
-                    blackPawnPromotion = true;
-                    return;
-                }
-            }
-            let updatedBoard = movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
-            if (!pawnPromotion()) {
-                if (piece.type === 'pawn') {
-                    let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
-                    pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset, updatedBoard);
-                    selectedSquare = null;
-                    selectedMove = null;
-                } else {
-                    castlingUpdate = updateCastlingStatus(piece, fromRow, fromCol, boardHistory);
-                    pushBoardHistory(null, castlingUpdate, halfMoveClockReset, updatedBoard);
-                    selectedSquare = null;
-                    selectedMove = null;
-                }
-            }
-        } else {
+        if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
             selectedSquare = null;
-            selectedMove = null;
+        } else if (square.type && boardHistory[boardHistory.length - 1].playerTurn === square.color) {
+            selectedSquare = { row: row, col: col };
+            selectedPieceType = square.type;
+        } else if (selectedSquare) {
+            let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory), boardHistory);
+            for (let i = 0; i < validDestinations.length; i++) {
+                if (validDestinations[i].row === row && validDestinations[i].col === col) {
+                    selectedMove = validDestinations[i];
+                    break;
+                }
+            }
+            if (selectedMove) {
+                let piece = _board[selectedSquare.row][selectedSquare.col];
+                let fromRow = selectedSquare.row;
+                let fromCol = selectedSquare.col;
+                let pawnHasMovedStatus = null;
+                let capturedPieceStatus = null;
+                let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
+                let endSquare = _board[row][col];
+                let halfMoveClockReset = null;
+                let promotion = null;
+                if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
+                    capturedPieceStatus = true;
+                } else {
+                    capturedPieceStatus = false;
+                }
+                if (piece.type === 'pawn') {
+                    pawnHasMovedStatus = true;
+                } else {
+                    pawnHasMovedStatus = false;
+                }
+                if (capturedPieceStatus || pawnHasMovedStatus) {
+                    halfMoveClockReset = true;
+                }
+                if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
+                    if (piece.color === 'white') {
+                        board[row + 1][col] = {};
+                    } else {
+                        board[row - 1][col] = {};
+                    }
+                }
+                if (selectedMove.promotion) {
+                    if (selectedMove.row === 0) {
+                        whitePawnPromotion = true;
+                        blackPawnPromotion = false;
+                        return;
+                    } else if (selectedMove.row === 7) {
+                        whitePawnPromotion = false;
+                        blackPawnPromotion = true;
+                        return;
+                    }
+                }
+                let updatedBoard = movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
+                if (!pawnPromotion()) {
+                    if (piece.type === 'pawn') {
+                        let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
+                        pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset, updatedBoard);
+                        selectedSquare = null;
+                        selectedMove = null;
+                    } else {
+                        castlingUpdate = updateCastlingStatus(piece, fromRow, fromCol, boardHistory);
+                        pushBoardHistory(null, castlingUpdate, halfMoveClockReset, updatedBoard);
+                        selectedSquare = null;
+                        selectedMove = null;
+                    }
+                }
+            } else {
+                selectedSquare = null;
+                selectedMove = null;
+            }
         }
-    }
 }
 
 canvas.addEventListener('click', onClick);
@@ -1704,7 +1704,7 @@ function deepCopyBoardHistory(boardHistory) {
 //very likely you will need boardHistory as a parameter
 function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray, boardHistory) {
     let splicedMoveArray = [];
-    let simulatedBoard = deepCopyBoard(boardHistory[boardHistory.length -1].board);
+    let simulatedBoard = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
     let simulatedPiece = _piece;
     if (!_moveArray) {
         return;
@@ -1808,21 +1808,49 @@ function isStalemate(boardHistory) {
 }
 
 function legalMoves(boardHistory) {
-    //returns an array of moves for currentPlayerTurn
-    //inclusive of piece for square collision?
-    //pawn promotion will be a series of (4) moves
-    let playerMoves = []
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-            let piece = boardHistory[boardHistory.length - 1].board[i][j];
-            let pieceMoves = validMoves(piece, i, j, boardHistory);
-            let legalMoves = spliceSelfCheckingMoves(piece, i, j, pieceMoves, boardHistory);
-            if (piece.color === boardHistory[boardHistory.length - 1].playerTurn) {
-                console.log(piece, legalMoves);
-                //u gotta make an obj per legal move
+    let currentPlayerTurn = boardHistory[boardHistory.length - 1].playerTurn;
+    let currentBoard = boardHistory[boardHistory.length - 1].board;
+    let playerMoves = [];
+
+    function processPieceMoves(piece, row, col) {
+        if (piece.color === currentPlayerTurn) {
+            let pieceMoves = legalMovesPerPiece(piece, row, col, boardHistory);
+            if (pieceMoves.length > 0) {
+                for (let move of pieceMoves) {
+                    playerMoves.push(move);
+                }
             }
         }
     }
+
+    function iterateBoard() {
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const piece = currentBoard[row][col];
+                processPieceMoves(piece, row, col);
+            }
+        }
+    }
+    iterateBoard();
+    console.log(playerMoves);
+    return playerMoves;
+}
+
+function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
+    let validMovesForPiece = validMoves(piece, fromRow, fromCol, boardHistory);
+    let legalMovesForPiece = spliceSelfCheckingMoves(piece, fromRow, fromCol, validMovesForPiece, boardHistory);
+    let moves = [];
+    for (let i = 0; i < legalMovesForPiece.length; i++) {
+        let move = legalMovesForPiece[i];
+        moves.push({
+            piece: piece.type,
+            fromRow: fromRow,
+            fromCol: fromCol,
+            toRow: move.row,
+            toCol: move.col
+        });
+    }
+    return moves;
 }
 
 legalMoves(boardHistory);
