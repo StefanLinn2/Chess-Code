@@ -644,26 +644,6 @@ function highlightEnemyPiece(row, col) {
     ctx.fill();
 }
 
-function findPawnInEndRow(_board) {
-    if (whitePawnPromotion) {
-        for (let col = 0; col < _board[0].length; col++) {
-            let piece = _board[0][col];
-            if (piece.type === 'pawn' && piece.color === boardHistory[boardHistory.length - 1].playerTurn) {
-                return { row: 0, col: col };
-            }
-        }
-    }
-    if (blackPawnPromotion) {
-        for (let col = 0; col < _board[7].length; col++) {
-            let piece = _board[7][col];
-            if (piece.type === 'pawn' && piece.color === boardHistory[boardHistory.length - 1].playerTurn) {
-                return { row: 7, col: col };
-            }
-        }
-    }
-    return null;
-}
-
 function pawnPromotion() {
     if (whitePawnPromotion || blackPawnPromotion) {
         return true;
