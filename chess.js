@@ -671,8 +671,6 @@ function pawnPromotion() {
     return false;
 }
 
-let promotionInProgress = false;
-
 function onClick(event) {
     let _board = boardHistory[boardHistory.length - 1].board;
     let col = Math.floor(event.offsetX / block);
