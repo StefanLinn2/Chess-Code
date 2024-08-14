@@ -37,8 +37,7 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-let boardHistory = fenToBoard('rnbqkb1r/ppppppPp/8/8/8/8/PPPPPPpP/RNBQKB1R w KQkq - 0 1')
-let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
+let boardHistory = fenToBoard('rnbqkb1r/ppppppPp/8/8/8/6q1/PPPPPPpP/RNBQKB1R w KQkq - 0 1')
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -568,7 +567,7 @@ function drawBoard(_board) {
         highlightPiece(selectedSquare.row, selectedSquare.col)
     }
     //add logic for highlighting en passant capture, poss refactor
-    let moves = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory));
+    let moves = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory), boardHistory);
     if (moves.length === 0) {
         return;
     }
@@ -680,7 +679,7 @@ function onClick(event) {
     if (pawnPromotion()) {
         let promotionType = promotionSelected(row, col);
         if (promotionType) {
-            movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
+            let updatedBoard = movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
             whitePawnPromotion = false;
             blackPawnPromotion = false;
             let halfMoveClockReset = true;
@@ -700,7 +699,7 @@ function onClick(event) {
                     castlingUpdate.whiteKing = false;
                 }
             }
-            pushBoardHistory(null, castlingUpdate, halfMoveClockReset);
+            pushBoardHistory(null, castlingUpdate, halfMoveClockReset, updatedBoard);
             selectedSquare = null;
             selectedMove = null;
         }
@@ -712,7 +711,7 @@ function onClick(event) {
         selectedSquare = { row: row, col: col };
         selectedPieceType = square.type;
     } else if (selectedSquare) {
-        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory));
+        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory), boardHistory);
         for (let i = 0; i < validDestinations.length; i++) {
             if (validDestinations[i].row === row && validDestinations[i].col === col) {
                 selectedMove = validDestinations[i];
@@ -760,16 +759,16 @@ function onClick(event) {
                     return;
                 }
             }
-            movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
+            let updatedBoard = movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
             if (!pawnPromotion()) {
                 if (piece.type === 'pawn') {
                     let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
-                    pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset);
+                    pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset, updatedBoard);
                     selectedSquare = null;
                     selectedMove = null;
                 } else {
                     castlingUpdate = updateCastlingStatus(piece, fromRow, fromCol, boardHistory);
-                    pushBoardHistory(null, castlingUpdate, halfMoveClockReset)
+                    pushBoardHistory(null, castlingUpdate, halfMoveClockReset, updatedBoard);
                     selectedSquare = null;
                     selectedMove = null;
                 }
@@ -817,7 +816,7 @@ function updateCastlingStatus(piece, fromRow, fromCol, boardHistory) {
     return castlingUpdate;
 }
 
-function pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset) {
+function pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset, updatedBoard) {
     let fullMoveModifier = 0;
     let halfMoveModifier = 0;
     if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
@@ -833,7 +832,7 @@ function pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset) {
     }
     boardHistory.push(
         {
-            board: deepCopyBoard(board),
+            board: deepCopyBoard(updatedBoard),
             playerTurn: invertCurrentPlayerTurn(),
             whiteKingCastleStatus: castlingUpdate.whiteKing,
             whiteQueenCastleStatus: castlingUpdate.whiteQueen,
@@ -855,7 +854,7 @@ function returnEnPassantSquare(piece, fromRow, toRow, col) {
 }
 
 function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion = null) {
-    //let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
+    let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
     let piece = board[startRow][startCol];
     if (piece.type === 'king' && (endCol - startCol === 2)) {
         if (boardHistory[boardHistory.length - 1].playerTurn === 'white') {
@@ -892,6 +891,7 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
             board[endRow][endCol] = { type: promotion, color: piece.color };
         }
     }
+    return board;
 }
 
 function validMoves(piece, row, col, _boardHistory) {
@@ -1347,7 +1347,7 @@ function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
             moves.push({ row: 0, col: 6 });
         }
         if (lastState.blackQueenCastleStatus &&
-            !isSquareThreatened(board, 0, 4, lastState.playerTurn) &&
+            !isSquareThreatened(_board, 0, 4, lastState.playerTurn) &&
             !isSquareThreatened(_board, 0, 3, lastState.playerTurn) &&
             !isSquareThreatened(_board, 0, 2, lastState.playerTurn) &&
             !isSquareThreatened(_board, 0, 1, lastState.playerTurn) &&
@@ -1701,9 +1701,10 @@ function deepCopyBoardHistory(boardHistory) {
 }
 // build a test
 
-function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray) {
+//very likely you will need boardHistory as a parameter
+function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray, boardHistory) {
     let splicedMoveArray = [];
-    let simulatedBoard = deepCopyBoard(board);
+    let simulatedBoard = deepCopyBoard(boardHistory[boardHistory.length -1].board);
     let simulatedPiece = _piece;
     if (!_moveArray) {
         return;
@@ -1792,7 +1793,7 @@ function isStalemate(boardHistory) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
             if (piece.color === boardHistory[boardHistory.length - 1].playerTurn && piece.type !== undefined) {
-                let moves = spliceSelfCheckingMoves(piece, row, col, validMoves(piece, row, col, simulatedBoardHistory));
+                let moves = spliceSelfCheckingMoves(piece, row, col, validMoves(piece, row, col, simulatedBoardHistory), boardHistory);
                 for (let i = 0; i < moves.length; i++) {
                     allPlayerMoves.push(moves[i]);
                 }
@@ -1815,7 +1816,7 @@ function legalMoves(boardHistory) {
         for (let j = 0; j < 8; j++) {
             let piece = boardHistory[boardHistory.length - 1].board[i][j];
             let pieceMoves = validMoves(piece, i, j, boardHistory);
-            let legalMoves = spliceSelfCheckingMoves(piece, i, j, pieceMoves);
+            let legalMoves = spliceSelfCheckingMoves(piece, i, j, pieceMoves, boardHistory);
             if (piece.color === boardHistory[boardHistory.length - 1].playerTurn) {
                 console.log(piece, legalMoves);
                 //u gotta make an obj per legal move
@@ -1845,8 +1846,7 @@ function drawGame() {
 
 setInterval(drawGame, 16);
 
-//refactor onClick function
-//draw a damn state diagram.
-//why is movePiece dependent on a global variable...
-//you have to remove board dependency as a global var.
+//you should definitely study event listeners and how they work more
+//you should review what a callback is
+
 //continue AI interface
