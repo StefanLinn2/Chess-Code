@@ -671,15 +671,15 @@ function onClick(event) {
     let col = Math.floor(event.offsetX / block);
     let row = Math.floor(event.offsetY / block);
     let square = _board[row][col];
+    let castlingUpdate = {
+        whiteKing: boardHistory[boardHistory.length - 1].whiteKingCastleStatus,
+        whiteQueen: boardHistory[boardHistory.length - 1].whiteQueenCastleStatus,
+        blackKing: boardHistory[boardHistory.length - 1].blackKingCastleStatus,
+        blackQueen: boardHistory[boardHistory.length - 1].blackQueenCastleStatus,
+    };
     if (pawnPromotion()) {
         let promotionType = promotionSelected(row, col);
         if (promotionType) {
-            let castlingUpdate = {
-                whiteKing: boardHistory[boardHistory.length - 1].whiteKingCastleStatus,
-                whiteQueen: boardHistory[boardHistory.length - 1].whiteQueenCastleStatus,
-                blackKing: boardHistory[boardHistory.length - 1].blackKingCastleStatus,
-                blackQueen: boardHistory[boardHistory.length - 1].blackQueenCastleStatus,
-            };
             movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
             whitePawnPromotion = false;
             blackPawnPromotion = false;
@@ -696,7 +696,7 @@ function onClick(event) {
                 if (selectedMove.col === 0){
                     castlingUpdate.whiteQueen = false;
                 }
-                if (selectedMove.row === 7){
+                if (selectedMove.col === 7){
                     castlingUpdate.whiteKing = false;
                 }
             }
@@ -762,12 +762,6 @@ function onClick(event) {
             }
             movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
             if (!pawnPromotion()) {
-                let castlingUpdate = {
-                    whiteKing: boardHistory[boardHistory.length - 1].whiteKingCastleStatus,
-                    whiteQueen: boardHistory[boardHistory.length - 1].whiteQueenCastleStatus,
-                    blackKing: boardHistory[boardHistory.length - 1].blackKingCastleStatus,
-                    blackQueen: boardHistory[boardHistory.length - 1].blackQueenCastleStatus,
-                }
                 if (piece.type === 'pawn') {
                     let epsq = returnEnPassantSquare(piece, fromRow, row, fromCol);
                     pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset);
