@@ -30,7 +30,6 @@ function invertCurrentPlayerTurn() {
     }
 }
 
-let promotionSelected = false;
 let whitePawnPromotion = false;
 let blackPawnPromotion = false;
 let selectedSquare = null;
@@ -651,24 +650,29 @@ function pawnPromotion() {
     return false;
 }
 
+function promotionSelected(row, col){
+    let promotionType = null;
+    if (row === 3 || row === 4) {
+        if (col >= 0 && col <= 1) {
+            promotionType = 'queen';
+        } else if (col >= 2 && col <= 3) {
+            promotionType = 'bishop';
+        } else if (col >= 4 && col <= 5) {
+            promotionType = 'knight';
+        } else if (col >= 6 && col <= 7) {
+            promotionType = 'rook';
+        }
+    }
+    return promotionType;
+}
+
 function onClick(event) {
     let _board = boardHistory[boardHistory.length - 1].board;
     let col = Math.floor(event.offsetX / block);
     let row = Math.floor(event.offsetY / block);
     let square = _board[row][col];
     if (pawnPromotion()) {
-        let promotionType = null;
-        if (row === 3 || row === 4) {
-            if (col >= 0 && col <= 1) {
-                promotionType = 'queen';
-            } else if (col >= 2 && col <= 3) {
-                promotionType = 'bishop';
-            } else if (col >= 4 && col <= 5) {
-                promotionType = 'knight';
-            } else if (col >= 6 && col <= 7) {
-                promotionType = 'rook';
-            }
-        }
+        let promotionType = promotionSelected(row, col);
         if (promotionType) {
             let castlingUpdate = {
                 whiteKing: boardHistory[boardHistory.length - 1].whiteKingCastleStatus,
