@@ -1826,7 +1826,7 @@ function legalMoves(boardHistory) {
     function iterateBoard() {
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
-                const piece = currentBoard[row][col];
+                let piece = currentBoard[row][col];
                 processPieceMoves(piece, row, col);
             }
         }
@@ -1842,12 +1842,13 @@ function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
     let moves = [];
     for (let i = 0; i < legalMovesForPiece.length; i++) {
         let move = legalMovesForPiece[i];
+        console.log(piece.type, move);
         moves.push({
             piece: piece.type,
             fromRow: fromRow,
             fromCol: fromCol,
             toRow: move.row,
-            toCol: move.col
+            toCol: move.col,
         });
     }
     return moves;
@@ -1873,8 +1874,5 @@ function drawGame() {
 };
 
 setInterval(drawGame, 16);
-
-//you should definitely study event listeners and how they work more
-//you should review what a callback is
 
 //continue AI interface
