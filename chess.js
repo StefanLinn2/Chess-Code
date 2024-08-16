@@ -37,7 +37,7 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-let boardHistory = fenToBoard('rnbqkb1r/ppppppPp/8/8/8/6q1/PPPPPPpP/RNBQKB1R w KQkq - 0 1')
+let boardHistory = fenToBoard('rnbqkbkr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -1811,7 +1811,6 @@ function legalMoves(boardHistory) {
     let currentPlayerTurn = boardHistory[boardHistory.length - 1].playerTurn;
     let currentBoard = boardHistory[boardHistory.length - 1].board;
     let playerMoves = [];
-
     function processPieceMoves(piece, row, col) {
         if (piece.color === currentPlayerTurn) {
             let pieceMoves = legalMovesPerPiece(piece, row, col, boardHistory);
@@ -1822,7 +1821,6 @@ function legalMoves(boardHistory) {
             }
         }
     }
-
     function iterateBoard() {
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
@@ -1832,7 +1830,6 @@ function legalMoves(boardHistory) {
         }
     }
     iterateBoard();
-    console.log(playerMoves);
     return playerMoves;
 }
 
@@ -1842,13 +1839,13 @@ function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
     let moves = [];
     for (let i = 0; i < legalMovesForPiece.length; i++) {
         let move = legalMovesForPiece[i];
-        console.log(piece.type, move);
         moves.push({
             piece: piece.type,
             fromRow: fromRow,
             fromCol: fromCol,
             toRow: move.row,
             toCol: move.col,
+            promotion: move.promotion
         });
     }
     return moves;

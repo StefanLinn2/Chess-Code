@@ -2034,6 +2034,19 @@ let fens = [
     "r1bq1rk1/pppnn1bp/3p2p1/3Ppp2/2P1P1P1/2N2P2/PP2B2P/R1BQNRK1 b - g3"
 ];
 
+function testPawnPromotionMoveList() {
+    let board = fenToBoard('5q2/6P1/8/8/8/8/8/8 w - - 0 1');
+    let moves = validMoves(board[board.length - 1].board[1][6], 1, 6, board);
+    assert(moves.length === 8, 'there should be 8 moves');
+    for (let move of moves){
+        assert(move.promotion);
+    }
+    let board2 = fenToBoard('5q2/8/6P1/8/8/8/8/8 w - - 0 1');
+    let moves2 = validMoves(board2[board2.length - 1].board[2][6], 2, 6, board2);
+    assert(moves2.length === 1);
+    assert(moves2.promotion === undefined)
+}
+
 function testChessScript(fen) {
     for (let fen of fens) {
         testFen(fen + ' 12 2424');
@@ -2043,6 +2056,7 @@ function testChessScript(fen) {
     testFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
     testFenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', testerInitialBoard[0].board);
     testBoardToFen();
+    testPawnPromotionMoveList();
     //hey my tests suck
     //assert(!isSquareThreatened(whiteQueenCheckingWhiteKing, findKingPosition(whiteQueenCheckingWhiteKing).row, findKingPosition(whiteQueenCheckingWhiteKing).col, 'white'), `white Queen is in sight of the White King, it should not return true, but it is! also ${findKingPosition(whiteQueenCheckingWhiteKing).row} + ${findKingPosition(whiteQueenCheckingWhiteKing).col} + ${boardHistory[boardHistory.length - 1].playerTurn}`);
     //assert(isSquareThreatened(blackKnightCheckingWhiteKing, findKingPosition(blackKnightCheckingWhiteKing).row, findKingPosition(blackKnightCheckingWhiteKing).col, 'white'), "King should be in check, attacked by black knight!");
