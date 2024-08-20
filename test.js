@@ -2050,9 +2050,9 @@ function testPawnPromotionMoveList() {
 function testPlayMove(){
     let board = fenToBoard('4k1r1/8/8/8/8/8/8/7K w - - 0 1');
     let move = legalMoves(board);
-    console.log(move)
-    let board2 = playMove(board, move);
-    assert(boardToFen(board2) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
+    let board2 = playMove(board, move[0]);
+    console.log(board2.length)
+    assert(boardToFen(board2[board2.length-1]) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
 }
 
 function testBlackQueenSideCastle(){

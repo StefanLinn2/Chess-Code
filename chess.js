@@ -1721,9 +1721,11 @@ function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
 
 function playMove(boardHistory, move) {
     let newBoard = movePiece(move.fromRow, move.fromCol, move.toRow, move.toCol, boardHistory, move.promotion);
-    console.log(newBoard);
+    // this is actually altering boardHistory^
     let copyBoardHistory = [...boardHistory];
-    copyBoardHistory.push(newBoard);
+    // copyBoardHistory.push(newBoard);
+    //above needs to be fixed, you're pushing the wrong board type
+    console.log(copyBoardHistory);
     return copyBoardHistory;
 }
 
