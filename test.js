@@ -2036,15 +2036,28 @@ let fens = [
 
 function testPawnPromotionMoveList() {
     let board = fenToBoard('5q2/6P1/8/8/8/8/8/8 w - - 0 1');
-    let moves = validMoves(board[board.length - 1].board[1][6], 1, 6, board);
+    let moves = legalMoves(board);
     assert(moves.length === 8, 'there should be 8 moves');
     for (let move of moves){
         assert(move.promotion);
     }
     let board2 = fenToBoard('5q2/8/6P1/8/8/8/8/8 w - - 0 1');
-    let moves2 = validMoves(board2[board2.length - 1].board[2][6], 2, 6, board2);
+    let moves2 = legalMoves(board2);
     assert(moves2.length === 1);
     assert(moves2.promotion === undefined)
+}
+
+function testPlayMove(){
+    let board = fenToBoard('4k1r1/8/8/8/8/8/8/7K w - - 0 1');
+    let move = legalMoves(board);
+    console.log(move)
+    let board2 = playMove(board, move);
+    assert(boardToFen(board2) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
+}
+
+function testBlackQueenSideCastle(){
+    let board = fenToBoard('r3k3/ppp1p3/n1p2n1b/5p2/3N4/3P4/PP1PPP1P/RNBQKB1R b KQq - 2 12');
+    let moves = legalMoves(board);
 }
 
 function testChessScript(fen) {
@@ -2057,12 +2070,9 @@ function testChessScript(fen) {
     testFenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', testerInitialBoard[0].board);
     testBoardToFen();
     testPawnPromotionMoveList();
+    testBlackQueenSideCastle();
+    testPlayMove();
     //hey my tests suck
-    //assert(!isSquareThreatened(whiteQueenCheckingWhiteKing, findKingPosition(whiteQueenCheckingWhiteKing).row, findKingPosition(whiteQueenCheckingWhiteKing).col, 'white'), `white Queen is in sight of the White King, it should not return true, but it is! also ${findKingPosition(whiteQueenCheckingWhiteKing).row} + ${findKingPosition(whiteQueenCheckingWhiteKing).col} + ${boardHistory[boardHistory.length - 1].playerTurn}`);
-    //assert(isSquareThreatened(blackKnightCheckingWhiteKing, findKingPosition(blackKnightCheckingWhiteKing).row, findKingPosition(blackKnightCheckingWhiteKing).col, 'white'), "King should be in check, attacked by black knight!");
-    //assert(isSquareThreatened(blackQueenCheckingWhiteKing, findKingPosition(blackQueenCheckingWhiteKing).row, findKingPosition(blackQueenCheckingWhiteKing).col, 'white'), "White king should be in check, black queen is attacking!");
-    //assert(isSquareThreatened(blackPawnCheckingWhiteKing, findKingPosition(blackPawnCheckingWhiteKing).row, findKingPosition(blackPawnCheckingWhiteKing).col, 'white'), "White king should be in check, black pawn is attacking!");
-    //assert(isKingInCheckmate(fourStepCheckmateForBlack), "isKingInCheckmate should be true, board is configured for four step checkmate with white in checkmate. testing this because game initializes with currentplayer === white")
     assert(isNumberLike('7'), 'should return true because 7 is a number');
     assert(!isNumberLike('p'), 'testing p as your string, should return false');
 }
