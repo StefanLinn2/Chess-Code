@@ -37,8 +37,7 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-let boardHistory = fenToBoard('4k1r1/8/8/8/8/8/8/7K w - - 0 1');
+let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
 
 function algorithmicToRowCol(algoString) {
@@ -672,20 +671,12 @@ function onClick(event) {
     let col = Math.floor(event.offsetX / block);
     let row = Math.floor(event.offsetY / block);
     let square = _board[row][col];
-    let castlingUpdate = {
-        whiteKing: boardHistory[boardHistory.length - 1].whiteKingCastleStatus,
-        whiteQueen: boardHistory[boardHistory.length - 1].whiteQueenCastleStatus,
-        blackKing: boardHistory[boardHistory.length - 1].blackKingCastleStatus,
-        blackQueen: boardHistory[boardHistory.length - 1].blackQueenCastleStatus,
-    };
     if (pawnPromotion()) {
         let promotionType = promotionSelected(row, col);
         if (promotionType) {
-            let updatedBoard = movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
+            movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
             whitePawnPromotion = false;
             blackPawnPromotion = false;
-            let halfMoveClockReset = true;
-
             selectedSquare = null;
             selectedMove = null;
         }
@@ -711,7 +702,6 @@ function onClick(event) {
                 let capturedPieceStatus = null;
                 let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
                 let endSquare = _board[row][col];
-                let halfMoveClockReset = null;
                 let promotion = null;
                 if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
                     capturedPieceStatus = true;
@@ -728,9 +718,9 @@ function onClick(event) {
                 }
                 if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
                     if (piece.color === 'white') {
-                        board[row + 1][col] = {};
+                        _board[row + 1][col] = {};
                     } else {
-                        board[row - 1][col] = {};
+                        _board[row - 1][col] = {};
                     }
                 }
                 if (selectedMove.promotion) {
