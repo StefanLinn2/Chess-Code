@@ -824,7 +824,6 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
     let piece = board[startRow][startCol];
     let pawnHasMovedStatus = null;
     let capturedPieceStatus = null;
-    let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
     let endSquare = board[endRow][endCol];
     let halfMoveClockReset = null;
     if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
@@ -1710,12 +1709,8 @@ function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
 
 
 function playMove(boardHistory, move) {
-    let newBoard = movePiece(move.fromRow, move.fromCol, move.toRow, move.toCol, boardHistory, move.promotion);
-    // this is actually altering boardHistory^
     let copyBoardHistory = [...boardHistory];
-    // copyBoardHistory.push(newBoard);
-    //above needs to be fixed, you're pushing the wrong board type
-    console.log(copyBoardHistory);
+    movePiece(move.fromRow, move.fromCol, move.toRow, move.toCol, copyBoardHistory, move.promotion);
     return copyBoardHistory;
 }
 

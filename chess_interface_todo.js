@@ -8,8 +8,8 @@ function legalMoves(board) {
 
 function playMove(board, move) {
     //returns a new board, but with the move played
-    //inclusive of piece.
-    //prob need move piece and pushBoardHistory together
+    //inclusive of piece?
+    //prob need move piece and pushBoardHistory together?
 }
 
 function scoreBoard(board) {
