@@ -2059,6 +2059,8 @@ function testBlackQueenSideCastle(){
     let moves = legalMoves(board);
 }
 
+
+
 function testChessScript(fen) {
     for (let fen of fens) {
         testFen(fen + ' 12 2424');

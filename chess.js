@@ -20,7 +20,7 @@ function assert(value, message) {
     }
 }
 
-function invertCurrentPlayerTurn() {
+function invertCurrentPlayerTurn(boardHistory) {
     if (boardHistory[boardHistory.length - 1].playerTurn === 'white') {
         return 'black';
     } else if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
@@ -38,7 +38,6 @@ let selectedMove = null;
 
 
 let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -799,7 +798,7 @@ function pushBoardHistory(epsq, castlingUpdate, halfMoveClockReset, updatedBoard
     boardHistory.push(
         {
             board: deepCopyBoard(updatedBoard),
-            playerTurn: invertCurrentPlayerTurn(),
+            playerTurn: invertCurrentPlayerTurn(boardHistory),
             whiteKingCastleStatus: castlingUpdate.whiteKing,
             whiteQueenCastleStatus: castlingUpdate.whiteQueen,
             blackKingCastleStatus: castlingUpdate.blackKing,
@@ -1479,7 +1478,8 @@ function isSquareThreatened(_row, _col, _boardHistory) {
 function isKingInCheckmate(_boardHistory) {
     let simulatedBoardHistory = deepCopyBoardHistory(_boardHistory);
     let simulatedBoard = simulatedBoardHistory[simulatedBoardHistory.length - 1].board;
-    let kingLocation = findKingPosition(simulatedBoard, simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn)
+    let playerTurn = simulatedBoardHistory[simulatedBoardHistory.length -1].playerTurn;
+    let kingLocation = findKingPosition(simulatedBoard, playerTurn);
     for (let row = 0; row < simulatedBoard.length; row++) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
@@ -1490,7 +1490,8 @@ function isKingInCheckmate(_boardHistory) {
                     let simulatedMove = simulatedBoard[move.row][move.col];
                     simulatedBoard[move.row][move.col] = piece;
                     simulatedBoard[row][col] = {};
-                    if (!isSquareThreatened(kingLocation.row, kingLocation.col, simulatedBoardHistory)) {
+                    let simulatedKingLocation = findKingPosition(simulatedBoard, playerTurn);
+                    if (!isSquareThreatened(simulatedKingLocation.row, simulatedKingLocation.col, simulatedBoardHistory)) {
                         simulatedBoard[row][col] = piece;
                         simulatedBoard[move.row][move.col] = simulatedMove;
                         return false;
@@ -1654,7 +1655,7 @@ function isStalemate(boardHistory) {
     }
     if (allPlayerMoves.length === 0
         &&
-        !isSquareThreatened(findKingPosition(latestBoard.board).row, findKingPosition(latestBoard.board).col, boardHistory)
+        !isSquareThreatened(findKingPosition(latestBoard.board, latestBoard.playerTurn).row, findKingPosition(latestBoard.board, latestBoard.playerTurn).col, boardHistory)
     ) {
         return true;
     }
@@ -1689,6 +1690,7 @@ function legalMoves(boardHistory) {
     return playerMoves;
 }
 
+
 function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
     let validMovesForPiece = validMoves(piece, fromRow, fromCol, boardHistory);
     let legalMovesForPiece = spliceSelfCheckingMoves(piece, fromRow, fromCol, validMovesForPiece, boardHistory);
@@ -1707,11 +1709,23 @@ function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
     return moves;
 }
 
-
 function playMove(boardHistory, move) {
     let copyBoardHistory = [...boardHistory];
     movePiece(move.fromRow, move.fromCol, move.toRow, move.toCol, copyBoardHistory, move.promotion);
     return copyBoardHistory;
+}
+
+function scoreBoard(board) {
+    if (isKingInCheckmate(board)){
+        return Infinity;
+    }
+    if (isGameInDraw(board)){
+        return 0;
+    }
+    //if it is checkmate, it should return positive infinity
+    //if it is draw, return 0
+    //calculate material score for white and black
+    //we want it to be a positive number when currentPlayerTurn has more material
 }
 
 function drawGame() {
@@ -1724,8 +1738,8 @@ function drawGame() {
     }
     if (isGameInDraw(boardHistory)) {
         console.log("game has ended in a draw!");
-    } else if (isKingInCheckmate(boardHistory) === true) {
-        console.log(invertCurrentPlayerTurn() + " won!")
+    } else if (isKingInCheckmate(boardHistory)) {
+        console.log(invertCurrentPlayerTurn(boardHistory) + " won!")
     }
     else if (isSquareThreatened(findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).row, findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).col, boardHistory)) {
         console.log(boardHistory[boardHistory.length - 1].playerTurn + ' is in check!');
