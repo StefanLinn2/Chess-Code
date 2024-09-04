@@ -147,7 +147,6 @@ function rowColToAlgorithmic(rowColObj) {
     return algorithmic;
 }
 
-//'rnbqkbnr/pppppppp/7r/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 function fenToBoard(_fen) {
     let boardHistory = [
     ];
@@ -273,7 +272,6 @@ function fenToBoard(_fen) {
     return boardHistory;
 }
 
-//'rnbqkbnr/pppppppp/7r/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 function boardToFen(_boardHistory) {
     let fen = '';
     for (let i = 0; i < _boardHistory.board.length; i++) {
@@ -410,50 +408,6 @@ let testerInitialBoard = [
         fullMoveClock: 1,
     }
 ];
-
-let blackPawnCheckingWhiteKing = [
-    [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
-    [{ type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{ type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }],
-    [{ type: 'rook', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'queen', color: 'white' }, { type: 'king', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'rook', color: 'white' }]
-];
-
-let blackKnightCheckingWhiteKing = [
-    [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
-    [{ type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'knight', color: 'white' }, { type: 'pawn', color: 'black' }],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{ type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'knight', color: 'black' }, { type: 'pawn', color: 'white' }],
-    [{ type: 'rook', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'queen', color: 'white' }, { type: 'king', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'rook', color: 'white' }]
-];
-
-let blackQueenCheckingWhiteKing = [
-    [{ type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'queen', color: 'black' }, { type: 'king', color: 'black' }, { type: 'bishop', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'rook', color: 'black' }],
-    [{ type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }, { type: 'queen', color: 'white' }, { type: 'pawn', color: 'black' }, { type: 'pawn', color: 'black' }],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{ type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }, { type: 'queen', color: 'black' }, { type: 'pawn', color: 'white' }, { type: 'pawn', color: 'white' }],
-    [{ type: 'rook', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'queen', color: 'white' }, { type: 'king', color: 'white' }, { type: 'bishop', color: 'white' }, { type: 'knight', color: 'white' }, { type: 'rook', color: 'white' }]
-];
-
-let fourStepCheckmateForBlack = [
-    [{ "type": "rook", "color": "black" }, { "type": "knight", "color": "black" }, { "type": "bishop", "color": "black" }, {}, { "type": "king", "color": "black" }, {}, { "type": "knight", "color": "black" }, { "type": "rook", "color": "black" }],
-    [{ "type": "pawn", "color": "black" }, { "type": "pawn", "color": "black" }, { "type": "pawn", "color": "black" }, { "type": "pawn", "color": "black" }, {}, { "type": "pawn", "color": "black" }, { "type": "pawn", "color": "black" }, { "type": "pawn", "color": "black" }],
-    [{}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, { "type": "bishop", "color": "black" }, {}, { "type": "pawn", "color": "black" }, {}, {}, {}],
-    [{ "type": "pawn", "color": "white" }, {}, {}, {}, {}, {}, {}, {}],
-    [{ "type": "knight", "color": "white" }, {}, {}, {}, {}, {}, {}, { "type": "pawn", "color": "white" }],
-    [{}, { "type": "pawn", "color": "white" }, { "type": "pawn", "color": "white" }, { "type": "pawn", "color": "white" }, { "type": "pawn", "color": "white" }, { "type": "queen", "color": "black" }, { "type": "pawn", "color": "white" }, {}],
-    [{ "type": "rook", "color": "white" }, {}, { "type": "bishop", "color": "white" }, { "type": "queen", "color": "white" }, { "type": "king", "color": "white" }, { "type": "bishop", "color": "white" }, { "type": "knight", "color": "white" }, { "type": "rook", "color": "white" }]
-]
 
 function drawSquare(block, row, col) {
     let squareX = col * block;
@@ -991,185 +945,6 @@ function validPawnMoves(piece, currentRow, currentCol, _boardHistory) {
     return moves;
 }
 
-let preEnPassantBoard = [
-    [
-        {
-            "type": "rook",
-            "color": "black"
-        },
-        {},
-        {
-            "type": "bishop",
-            "color": "black"
-        },
-        {
-            "type": "queen",
-            "color": "black"
-        },
-        {
-            "type": "king",
-            "color": "black"
-        },
-        {
-            "type": "bishop",
-            "color": "black"
-        },
-        {
-            "type": "knight",
-            "color": "black"
-        },
-        {
-            "type": "rook",
-            "color": "black"
-        }
-    ],
-    [
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "black"
-        }
-    ],
-    [
-        {
-            "type": "knight",
-            "color": "black"
-        },
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {},
-        {
-            "type": "pawn",
-            "color": "black"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {},
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {}
-    ],
-    [
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {},
-        {}
-    ],
-    [
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {},
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        },
-        {
-            "type": "pawn",
-            "color": "white"
-        }
-    ],
-    [
-        {
-            "type": "rook",
-            "color": "white"
-        },
-        {
-            "type": "knight",
-            "color": "white"
-        },
-        {
-            "type": "bishop",
-            "color": "white"
-        },
-        {
-            "type": "queen",
-            "color": "white"
-        },
-        {
-            "type": "king",
-            "color": "white"
-        },
-        {
-            "type": "bishop",
-            "color": "white"
-        },
-        {
-            "type": "knight",
-            "color": "white"
-        },
-        {
-            "type": "rook",
-            "color": "white"
-        }
-    ]
-]
-
 function equalMoveArrayCheck(array1, array2) {
     if (array1.length !== array2.length) {
         return false;
@@ -1478,7 +1253,7 @@ function isSquareThreatened(_row, _col, _boardHistory) {
 function isKingInCheckmate(_boardHistory) {
     let simulatedBoardHistory = deepCopyBoardHistory(_boardHistory);
     let simulatedBoard = simulatedBoardHistory[simulatedBoardHistory.length - 1].board;
-    let playerTurn = simulatedBoardHistory[simulatedBoardHistory.length -1].playerTurn;
+    let playerTurn = simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn;
     let kingLocation = findKingPosition(simulatedBoard, playerTurn);
     for (let row = 0; row < simulatedBoard.length; row++) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
@@ -1716,16 +1491,36 @@ function playMove(boardHistory, move) {
 }
 
 function scoreBoard(board) {
-    if (isKingInCheckmate(board)){
+    if (isKingInCheckmate(board)) {
         return Infinity;
     }
-    if (isGameInDraw(board)){
+    if (isGameInDraw(board)) {
         return 0;
     }
-    //if it is checkmate, it should return positive infinity
-    //if it is draw, return 0
-    //calculate material score for white and black
-    //we want it to be a positive number when currentPlayerTurn has more material
+    let latestBoardHistory = board[board.length - 1];
+    let latestBoard = latestBoardHistory.board;
+    let pieceValues = {
+        'pawn': 1,
+        'knight': 3,
+        'bishop': 3,
+        'rook': 5,
+        'queen': 9,
+    };
+    let score = 0;
+    for (let row = 0; row < latestBoard.length; row++) {
+        for (let col = 0; col < latestBoard[row].length; col++) {
+            let scannedSquare = latestBoard[row][col];
+            if (scannedSquare.type) {
+                let pieceScore = pieceValues[scannedSquare.type] || 0;
+                if (scannedSquare.color === latestBoardHistory.playerTurn) {
+                    score += pieceScore;
+                } else {
+                    score -= pieceScore;
+                }
+            }
+        }
+    }
+    return score;
 }
 
 function drawGame() {
