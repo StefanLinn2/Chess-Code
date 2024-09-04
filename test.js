@@ -2038,7 +2038,7 @@ function testPawnPromotionMoveList() {
     let board = fenToBoard('5q2/6P1/8/8/8/8/8/8 w - - 0 1');
     let moves = legalMoves(board);
     assert(moves.length === 8, 'there should be 8 moves');
-    for (let move of moves){
+    for (let move of moves) {
         assert(move.promotion);
     }
     let board2 = fenToBoard('5q2/8/6P1/8/8/8/8/8 w - - 0 1');
@@ -2047,25 +2047,39 @@ function testPawnPromotionMoveList() {
     assert(moves2.promotion === undefined)
 }
 
-function testPlayMove(){
+function testPlayMove() {
     let board = fenToBoard('4k1r1/8/8/8/8/8/8/7K w - - 0 1');
     let move = legalMoves(board);
     let board2 = playMove(board, move[0]);
-    assert(boardToFen(board2[board2.length-1]) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
+    assert(boardToFen(board2[board2.length - 1]) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
 }
 
-function testPlayMovePawnPromotion(){
+function testPlayMovePawnPromotion() {
     let board = fenToBoard('4k3/6P1/8/8/8/8/8/4K3 w - - 0 1');
     let move = legalMoves(board);
     let board2 = playMove(board, move[0]);
-    assert(boardToFen(board2[board2.length-1]) === '4k1Q1/8/8/8/8/8/8/4K3 b - - 0 1', 'there should be a wQ row 0, col 6')
+    assert(boardToFen(board2[board2.length - 1]) === '4k1Q1/8/8/8/8/8/8/4K3 b - - 0 1', 'there should be a wQ row 0, col 6')
 }
 
-function testBlackQueenSideCastle(){
+function testBlackQueenSideCastle() {
     let board = fenToBoard('r3k3/ppp1p3/n1p2n1b/5p2/3N4/3P4/PP1PPP1P/RNBQKB1R b KQq - 2 12');
     let moves = legalMoves(board);
 }
 
+function testScoreBoard() {
+    let board1 = fenToBoard('4k1Q1/8/8/8/8/8/8/4K3 w - - 0 1');
+    let scoreBoard1 = scoreBoard(board1);
+    assert(scoreBoard1 === 9, 'scoreBoard1 should have +9');
+    let board2 = fenToBoard('3k4/8/3Q4/8/8/8/8/4K3 w - - 0 1');
+    let scoreBoard2 = scoreBoard(board2);
+    assert(scoreBoard2 === 9, 'scoreBoard2 should have +9');
+    let board3 = fenToBoard('3k4/8/3Q4/8/8/8/8/4K3 b - - 0 1');
+    let scoreBoard3 = scoreBoard(board3);
+    assert(scoreBoard3 === -9, 'scoreBoard3 should have -9');
+    let board4 = fenToBoard('r2k4/5n2/3Q4/8/8/2P5/8/4K3 b - - 0 1');
+    let scoreBoard4 = scoreBoard(board4);
+    assert(scoreBoard4 === -2, 'scoreBoard4 should have -2');
+}
 
 function testChessScript(fen) {
     for (let fen of fens) {
@@ -2080,6 +2094,7 @@ function testChessScript(fen) {
     testBlackQueenSideCastle();
     testPlayMove();
     testPlayMovePawnPromotion();
+    testScoreBoard();
     //hey my tests suck
     assert(isNumberLike('7'), 'should return true because 7 is a number');
     assert(!isNumberLike('p'), 'testing p as your string, should return false');

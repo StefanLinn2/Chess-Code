@@ -1258,14 +1258,14 @@ function isKingInCheckmate(_boardHistory) {
     for (let row = 0; row < simulatedBoard.length; row++) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
-            if (piece.color === boardHistory[boardHistory.length - 1].playerTurn && piece.type !== undefined) {
+            if (piece.color === playerTurn && piece.type !== undefined) {
                 let moves = validMoves(piece, row, col, simulatedBoardHistory);
                 for (let i = 0; i < moves.length; i++) {
                     let move = moves[i];
                     let simulatedMove = simulatedBoard[move.row][move.col];
+                    let simulatedKingLocation = findKingPosition(simulatedBoard, playerTurn);
                     simulatedBoard[move.row][move.col] = piece;
                     simulatedBoard[row][col] = {};
-                    let simulatedKingLocation = findKingPosition(simulatedBoard, playerTurn);
                     if (!isSquareThreatened(simulatedKingLocation.row, simulatedKingLocation.col, simulatedBoardHistory)) {
                         simulatedBoard[row][col] = piece;
                         simulatedBoard[move.row][move.col] = simulatedMove;
