@@ -1523,6 +1523,12 @@ function scoreBoard(board) {
     return score;
 }
 
+function randomAI(board) {
+    let moves = legalMoves(board);
+    let randomIndex = Math.floor(Math.random() * moves.length);
+    return moves[randomIndex];
+}
+
 function drawGame() {
     let latestBoardHistory = boardHistory[boardHistory.length - 1];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
