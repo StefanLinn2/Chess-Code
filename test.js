@@ -2079,6 +2079,10 @@ function testScoreBoard() {
     let board4 = fenToBoard('r2k4/5n2/3Q4/8/8/2P5/8/4K3 b - - 0 1');
     let scoreBoard4 = scoreBoard(board4);
     assert(scoreBoard4 === -2, 'scoreBoard4 should have -2');
+    let scoreBoard5 = scoreBoard(fenToBoard('7k/6Q1/8/8/8/8/8/4K1R1 b - - 0 1'));
+    assert(scoreBoard5 === -Infinity, 'scoreBoard5 should be -infinity');
+    let scoreBoard6 = scoreBoard(fenToBoard('k5q1/8/8/8/8/8/q7/7K w - - 0 1'));
+    assert(scoreBoard6 === 0, 'scoreBoard6 is a draw and should = 0')
 }
 
 function testChessScript(fen) {
