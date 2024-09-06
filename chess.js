@@ -1536,14 +1536,14 @@ function drawGame() {
         bannerFilm();
         drawPawnPromotionBanner();
     }
-    // if (isGameInDraw(boardHistory)) {
-    //     console.log("game has ended in a draw!");
-    // } else if (isKingInCheckmate(boardHistory)) {
-    //     console.log(invertCurrentPlayerTurn(boardHistory) + " won!")
-    // }
-    // else if (isSquareThreatened(findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).row, findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).col, boardHistory)) {
-    //     console.log(boardHistory[boardHistory.length - 1].playerTurn + ' is in check!');
-    // }
+    if (isGameInDraw(boardHistory)) {
+        console.log("game has ended in a draw!");
+    } else if (isKingInCheckmate(boardHistory)) {
+        console.log(invertCurrentPlayerTurn(boardHistory) + " won!")
+    }
+    else if (isSquareThreatened(findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).row, findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).col, boardHistory)) {
+        console.log(boardHistory[boardHistory.length - 1].playerTurn + ' is in check!');
+    }
 };
 
 setInterval(drawGame, 16);
