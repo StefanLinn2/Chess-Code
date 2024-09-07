@@ -628,6 +628,7 @@ function onClick(event) {
         let promotionType = promotionSelected(row, col);
         if (promotionType) {
             movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
+            doAIMove();
             whitePawnPromotion = false;
             blackPawnPromotion = false;
             selectedSquare = null;
@@ -688,6 +689,7 @@ function onClick(event) {
                     }
                 }
                 movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
+                doAIMove();
                 if (!pawnPromotion()) {
                     selectedSquare = null;
                     selectedMove = null;
@@ -700,6 +702,14 @@ function onClick(event) {
 }
 
 canvas.addEventListener('click', onClick);
+
+function doAIMove() {
+    if (legalMoves(boardHistory).length === 0) {
+        return;
+    }
+    let randomMove = joelAI(boardHistory);
+    movePiece(randomMove.fromRow, randomMove.fromCol, randomMove.toRow, randomMove.toCol, boardHistory, randomMove.promotion);
+}
 
 function updateCastlingStatus(piece, fromRow, fromCol, boardHistory) {
     let lastState = boardHistory[boardHistory.length - 1];
@@ -1265,6 +1275,7 @@ function isKingInCheckmate(_boardHistory) {
                     let simulatedMove = simulatedBoard[move.row][move.col];
                     simulatedBoard[move.row][move.col] = piece;
                     simulatedBoard[row][col] = {};
+                    //use playMove
                     let simulatedKingLocation = findKingPosition(simulatedBoard, playerTurn);
                     if (!isSquareThreatened(simulatedKingLocation.row, simulatedKingLocation.col, simulatedBoardHistory)) {
                         simulatedBoard[row][col] = piece;
@@ -1327,7 +1338,7 @@ function deepCopyBoardHistory(boardHistory) {
 function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray, boardHistory) {
     let splicedMoveArray = [];
     let simulatedBoardHistory = deepCopyBoardHistory(boardHistory);
-    let simulatedBoard = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
+    let simulatedBoard = simulatedBoardHistory[simulatedBoardHistory.length - 1].board;
     let simulatedPiece = _piece;
     if (!_moveArray) {
         return;
@@ -1341,7 +1352,9 @@ function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray, board
         let testedSquare = simulatedBoard[testedMove.row][testedMove.col];
         simulatedBoard[testedMove.row][testedMove.col] = simulatedPiece;
         simulatedBoard[_pieceRow][_pieceCol] = {};
-        if (!isSquareThreatened(findKingPosition(simulatedBoard, simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn).row, findKingPosition(simulatedBoard, simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn).col, simulatedBoardHistory)) {
+        let kingPosition2 = findKingPosition(simulatedBoard, simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn);
+        let kingPosition3 = findKingPosition(simulatedBoard, simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn);
+        if (!isSquareThreatened(kingPosition2.row, kingPosition3.col, simulatedBoardHistory)) {
             simulatedBoard[_pieceRow][_pieceCol] = simulatedPiece;
             simulatedBoard[testedMove.row][testedMove.col] = testedSquare;
             splicedMoveArray.push(testedMove);
@@ -1351,6 +1364,7 @@ function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray, board
     }
     return splicedMoveArray;
 }
+//you need to fix when enpassant remove you from chess
 
 function areBoardsEqual(_board1, _board2) {
     if (_board1.length !== _board2.length) {
@@ -1464,7 +1478,6 @@ function legalMoves(boardHistory) {
     return playerMoves;
 }
 
-
 function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
     let validMovesForPiece = validMoves(piece, fromRow, fromCol, boardHistory);
     let legalMovesForPiece = spliceSelfCheckingMoves(piece, fromRow, fromCol, validMovesForPiece, boardHistory);
@@ -1526,6 +1539,52 @@ function randomAI(board) {
     let moves = legalMoves(board);
     let randomIndex = Math.floor(Math.random() * moves.length);
     return moves[randomIndex];
+}
+
+function greedyAI(board) {
+    let moves = legalMoves(board);
+    let largestScore = -Infinity;
+    let largestScoringMove = null;
+    for (let move of moves) {
+        let newBoard = playMove(board, move);
+        let newBoardScore = -scoreBoard(newBoard);
+        if (newBoardScore > largestScore) {
+            largestScore = newBoardScore;
+            largestScoringMove = move;
+        }
+    }
+    return largestScoringMove;
+}
+
+function joelAI(board) {
+    let moves = legalMoves(board);
+    let largestScore = -Infinity;
+    let largestScoringMove = null;
+    for (let move of moves) {
+        let newBoard = playMove(board, move);
+        let newBoardScore = -joelScoreBoard(newBoard, 1);
+        if (newBoardScore > largestScore) {
+            largestScore = newBoardScore;
+            largestScoringMove = move;
+        }
+    }
+    return largestScoringMove;
+}
+
+function joelScoreBoard(board, depth) {
+    if (depth === 0) {
+        return scoreBoard(board);
+    }
+    let moves = legalMoves(board);
+    let largestScore = -Infinity;
+    for (let move of moves) {
+        let newBoard = playMove(board, move);
+        let newBoardScore = -joelScoreBoard(newBoard, depth - 1);
+        if (newBoardScore > largestScore) {
+            largestScore = newBoardScore;
+        }
+    }
+    return largestScore;
 }
 
 function drawGame() {

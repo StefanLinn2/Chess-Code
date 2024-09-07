@@ -13,7 +13,7 @@ function playMove(board, move) {
 }
 
 function scoreBoard(board) {
-    //if it is checkmate, it should return positive infinity
+    //if it is checkmate, it should return negative infinity
     //if it is draw, return 0
     //calculate material score for white and black
     //we want it to be a positive number when currentPlayerTurn has more material

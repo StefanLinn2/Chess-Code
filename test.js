@@ -2085,6 +2085,12 @@ function testScoreBoard() {
     assert(scoreBoard6 === 0, 'scoreBoard6 is a draw and should = 0')
 }
 
+function testLegalMoves(){
+    let board = fenToBoard('r1bB1knr/p1p1Q1b1/1p4pp/2nB4/3PP3/8/PPP2PPP/RN2K1NR b KQ - 2 11');
+    console.log(legalMoves(board));
+    assert(legalMoves(board).length === 1, 'you should have 1 legal move to get king out of check');
+}
+
 function testChessScript(fen) {
     for (let fen of fens) {
         testFen(fen + ' 12 2424');
@@ -2099,6 +2105,7 @@ function testChessScript(fen) {
     testPlayMove();
     testPlayMovePawnPromotion();
     testScoreBoard();
+    testLegalMoves();
     //hey my tests suck
     assert(isNumberLike('7'), 'should return true because 7 is a number');
     assert(!isNumberLike('p'), 'testing p as your string, should return false');
