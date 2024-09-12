@@ -38,7 +38,7 @@ let selectedMove = null;
 
 
 //let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-let boardHistory = fenToBoard('8/8/5k2/8/4Pp2/8/8/4K3 b - e3 0 1');
+let boardHistory = fenToBoard('8/8/4ppp1/4pkp1/4Ppp1/3P5/8/4K3 b - e3 0 1');
 
 
 function algorithmicToRowCol(algoString) {
@@ -830,7 +830,7 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
             board[0][3] = { type: 'rook', color: 'black' };
             board[startRow][startCol] = {};
         }
-    } else if(enPassantCapture && piece.type === 'pawn'){
+    } else if (enPassantCapture && enPassantCapture.row === endRow && enPassantCapture.col === endCol && piece.type === 'pawn') {
         if (piece.color === 'white') {
             board[endRow + 1][endCol] = {};
             board[endRow][endCol] = piece;
@@ -840,7 +840,7 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
             board[endRow][endCol] = piece;
             board[startRow][startCol] = {};
         }
-    }     
+    }
     else {
         board[endRow][endCol] = piece;
         board[startRow][startCol] = {};
@@ -887,7 +887,6 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
     }
     return board;
 }
-
 
 function validMoves(piece, row, col, _boardHistory) {
     if (piece.type === 'pawn') {
@@ -1348,11 +1347,11 @@ function deepCopyBoardHistory(boardHistory) {
 }
 // build a test
 
-function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray, boardHistory) {
+function spliceSelfCheckingMoves(simulatedPiece, _pieceRow, _pieceCol, _moveArray, boardHistory) {
     let splicedMoveArray = [];
     let simulatedBoardHistory = deepCopyBoardHistory(boardHistory);
     let simulatedBoard = simulatedBoardHistory[simulatedBoardHistory.length - 1].board;
-    let simulatedPiece = _piece;
+    let enPassantCapture = simulatedBoardHistory[simulatedBoardHistory.length - 1].enPassant;
     if (!_moveArray) {
         return;
     }
@@ -1363,8 +1362,24 @@ function spliceSelfCheckingMoves(_piece, _pieceRow, _pieceCol, _moveArray, board
     for (let i = 0; i < _moveArray.length; i++) {
         let testedMove = _moveArray[i];
         let testedSquare = simulatedBoard[testedMove.row][testedMove.col];
-        simulatedBoard[testedMove.row][testedMove.col] = simulatedPiece;
-        simulatedBoard[_pieceRow][_pieceCol] = {};
+        if (enPassantCapture &&
+            enPassantCapture.row === testedMove.row &&
+            enPassantCapture.col === testedMove.col &&
+            simulatedPiece.type === 'pawn') {
+            if (simulatedPiece.color === 'white') {
+                simulatedBoard[testedMove.row + 1][testedMove.Col] = {};
+                simulatedBoard[testedMove.row][testedMove.Col] = simulatedPiece;
+                simulatedBoard[_pieceRow][_pieceCol] = {};
+            } else {
+                simulatedBoard[testedMove.row - 1][testedMove.col] = {};
+                simulatedBoard[testedMove.row][testedMove.col] = simulatedPiece;
+                simulatedBoard[_pieceRow][_pieceCol] = {};
+            }
+        }
+        else {
+            simulatedBoard[testedMove.row][testedMove.col] = simulatedPiece;
+            simulatedBoard[_pieceRow][_pieceCol] = {};
+        }
         let kingPosition2 = findKingPosition(simulatedBoard, simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn);
         let kingPosition3 = findKingPosition(simulatedBoard, simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn);
         if (!isSquareThreatened(kingPosition2.row, kingPosition3.col, simulatedBoardHistory)) {
@@ -1622,5 +1637,6 @@ setInterval(drawGame, 16);
 
 //continue AI interface
 //ok you have a bug in castling, king can just float anywhere and proc castling, and spawn in rook
-//you have a bug with splicing becuase you don't account for when en passant removes you from check
-//something is wrong with move piece, you shouldn't be able to move outside of valid moves
+//that seems to be from the AI?^
+//
+//you need to fix isKingInCheckmate for en passants

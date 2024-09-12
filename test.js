@@ -2050,7 +2050,9 @@ function testPawnPromotionMoveList() {
 function testPlayMove() {
     let board = fenToBoard('4k1r1/8/8/8/8/8/8/7K w - - 0 1');
     let move = legalMoves(board);
+    console.log(move)
     let board2 = playMove(board, move[0]);
+    console.log(board2)
     assert(boardToFen(board2[board2.length - 1]) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
 }
 
@@ -2090,6 +2092,10 @@ function testLegalMoves(){
     assert(legalMoves(board).length === 1, 'you should have 1 legal move to get king out of check');
 }
 
+function testEnPassantOutOfCheck(){
+    let board = fenToBoard('8/8/4ppp1/4pkp1/4Ppp1/3P5/8/4K3 b - e3 0 1');
+    assert (legalMoves(board).length === 1, 'the only way out is to enpassant out of check');
+}
 //enpassant check removal test
 //'8/8/8/5k2/4Pp2/8/8/4K3 w - e3 0 1'
 
@@ -2111,6 +2117,7 @@ function testChessScript(fen) {
     testPlayMovePawnPromotion();
     testScoreBoard();
     testLegalMoves();
+    testEnPassantOutOfCheck();
     //hey my tests suck
     assert(isNumberLike('7'), 'should return true because 7 is a number');
     assert(!isNumberLike('p'), 'testing p as your string, should return false');
