@@ -2087,9 +2087,14 @@ function testScoreBoard() {
 
 function testLegalMoves(){
     let board = fenToBoard('r1bB1knr/p1p1Q1b1/1p4pp/2nB4/3PP3/8/PPP2PPP/RN2K1NR b KQ - 2 11');
-    console.log(legalMoves(board));
     assert(legalMoves(board).length === 1, 'you should have 1 legal move to get king out of check');
 }
+
+//enpassant check removal test
+//'8/8/8/5k2/4Pp2/8/8/4K3 w - e3 0 1'
+
+//mate in 2, weird bug where joelAI crashes
+//'1rbqkb1r/pppppppp/2n4n/6N1/2B1P3/5Q2/PPPP1PPP/RNB1K2R w KQk - 0 6'
 
 function testChessScript(fen) {
     for (let fen of fens) {

@@ -37,7 +37,9 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+let boardHistory = fenToBoard('8/8/5k2/8/4Pp2/8/8/4K3 b - e3 0 1');
+
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -628,7 +630,7 @@ function onClick(event) {
         let promotionType = promotionSelected(row, col);
         if (promotionType) {
             movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
-            doAIMove();
+            //doAIMove();
             whitePawnPromotion = false;
             blackPawnPromotion = false;
             selectedSquare = null;
@@ -651,7 +653,6 @@ function onClick(event) {
             }
             if (selectedMove) {
                 let piece = _board[selectedSquare.row][selectedSquare.col];
-
                 let pawnHasMovedStatus = null;
                 let capturedPieceStatus = null;
                 let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
@@ -689,7 +690,7 @@ function onClick(event) {
                     }
                 }
                 movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
-                doAIMove();
+                //doAIMove();
                 if (!pawnPromotion()) {
                     selectedSquare = null;
                     selectedMove = null;
@@ -803,26 +804,33 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
         halfMoveClockReset = true;
     }
     if (piece.type === 'king' && (endCol - startCol === 2)) {
-        if (boardHistory[boardHistory.length - 1].playerTurn === 'white') {
+        if (boardHistory[boardHistory.length - 1].playerTurn === 'white' &&
+            boardHistory[boardHistory.length - 1].whiteKingCastleStatus) {
             board[endRow][endCol] = piece;
             board[7][7] = {};
             board[7][5] = { type: 'rook', color: 'white' };
             board[startRow][startCol] = {};
+            console.log('hi')
         }
-        if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
+        else if (boardHistory[boardHistory.length - 1].playerTurn === 'black' &&
+            boardHistory[boardHistory.length - 1].blackKingCastleStatus) {
             board[endRow][endCol] = piece;
             board[0][7] = {};
             board[0][5] = { type: 'rook', color: 'black' };
             board[startRow][startCol] = {};
         }
     } else if (piece.type === 'king' && (endCol - startCol === -2)) {
-        if (boardHistory[boardHistory.length - 1].playerTurn === 'white') {
+        if (boardHistory[boardHistory.length - 1].playerTurn === 'white' &&
+            boardHistory[boardHistory.length - 1].whiteQueenCastleStatus
+        ) {
             board[endRow][endCol] = piece;
             board[7][0] = {};
             board[7][3] = { type: 'rook', color: 'white' };
             board[startRow][startCol] = {};
         }
-        if (boardHistory[boardHistory.length - 1].playerTurn === 'black') {
+        if (boardHistory[boardHistory.length - 1].playerTurn === 'black' &&
+            boardHistory[boardHistory.length - 1].blackQueenCastleStatus
+        ) {
             board[endRow][endCol] = piece;
             board[0][0] = {};
             board[0][3] = { type: 'rook', color: 'black' };
@@ -1608,3 +1616,6 @@ function drawGame() {
 setInterval(drawGame, 16);
 
 //continue AI interface
+//ok you have a bug in castling, king can just float anywhere and proc castling, and spawn in rook
+//you have a bug with splicing becuase you don't account for when en passant removes you from check
+//something is wrong with move piece, you shouldn't be able to move outside of valid moves
