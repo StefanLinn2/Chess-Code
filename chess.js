@@ -655,7 +655,7 @@ function onClick(event) {
                 let piece = _board[selectedSquare.row][selectedSquare.col];
                 let pawnHasMovedStatus = null;
                 let capturedPieceStatus = null;
-                let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
+
                 let endSquare = _board[row][col];
                 let promotion = null;
                 if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
@@ -670,13 +670,6 @@ function onClick(event) {
                 }
                 if (capturedPieceStatus || pawnHasMovedStatus) {
                     halfMoveClockReset = true;
-                }
-                if (enPassantCapture && selectedPieceType === 'pawn' && row === enPassantCapture.row && col === enPassantCapture.col) {
-                    if (piece.color === 'white') {
-                        _board[row + 1][col] = {};
-                    } else {
-                        _board[row - 1][col] = {};
-                    }
                 }
                 if (selectedMove.promotion) {
                     if (selectedMove.row === 0) {
@@ -790,6 +783,7 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
     let capturedPieceStatus = null;
     let endSquare = board[endRow][endCol];
     let halfMoveClockReset = null;
+    let enPassantCapture = boardHistory[boardHistory.length - 1].enPassant;
     if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
         capturedPieceStatus = true;
     } else {
@@ -836,7 +830,18 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
             board[0][3] = { type: 'rook', color: 'black' };
             board[startRow][startCol] = {};
         }
-    } else {
+    } else if(enPassantCapture && piece.type === 'pawn'){
+        if (piece.color === 'white') {
+            board[endRow + 1][endCol] = {};
+            board[endRow][endCol] = piece;
+            board[startRow][startCol] = {};
+        } else {
+            board[endRow - 1][endCol] = {};
+            board[endRow][endCol] = piece;
+            board[startRow][startCol] = {};
+        }
+    }     
+    else {
         board[endRow][endCol] = piece;
         board[startRow][startCol] = {};
     }
