@@ -1362,21 +1362,21 @@ function spliceSelfCheckingMoves(simulatedPiece, _pieceRow, _pieceCol, _moveArra
     for (let i = 0; i < _moveArray.length; i++) {
         let testedMove = _moveArray[i];
         let testedSquare = simulatedBoard[testedMove.row][testedMove.col];
+        let capturedPawn = null;
         if (enPassantCapture &&
             enPassantCapture.row === testedMove.row &&
             enPassantCapture.col === testedMove.col &&
             simulatedPiece.type === 'pawn') {
             if (simulatedPiece.color === 'white') {
-                simulatedBoard[testedMove.row + 1][testedMove.Col] = {};
-                simulatedBoard[testedMove.row][testedMove.Col] = simulatedPiece;
-                simulatedBoard[_pieceRow][_pieceCol] = {};
+                capturedPawn = simulatedBoard[testedMove.row + 1][testedMove.col];
+                simulatedBoard[testedMove.row + 1][testedMove.col] = {};
             } else {
+                capturedPawn = simulatedBoard[testedMove.row - 1][testedMove.col];
                 simulatedBoard[testedMove.row - 1][testedMove.col] = {};
-                simulatedBoard[testedMove.row][testedMove.col] = simulatedPiece;
-                simulatedBoard[_pieceRow][_pieceCol] = {};
             }
-        }
-        else {
+            simulatedBoard[testedMove.row][testedMove.col] = simulatedPiece;
+            simulatedBoard[_pieceRow][_pieceCol] = {};
+        } else {
             simulatedBoard[testedMove.row][testedMove.col] = simulatedPiece;
             simulatedBoard[_pieceRow][_pieceCol] = {};
         }
@@ -1389,10 +1389,16 @@ function spliceSelfCheckingMoves(simulatedPiece, _pieceRow, _pieceCol, _moveArra
         }
         simulatedBoard[testedMove.row][testedMove.col] = testedSquare;
         simulatedBoard[_pieceRow][_pieceCol] = simulatedPiece;
+        if (capturedPawn) {
+            if (simulatedPiece.color === 'white') {
+                simulatedBoard[testedMove.row + 1][testedMove.col] = capturedPawn;
+            } else {
+                simulatedBoard[testedMove.row - 1][testedMove.col] = capturedPawn;
+            }
+        }
     }
     return splicedMoveArray;
 }
-//you need to fix when enpassant remove you from chess
 
 function areBoardsEqual(_board1, _board2) {
     if (_board1.length !== _board2.length) {
@@ -1638,5 +1644,5 @@ setInterval(drawGame, 16);
 //continue AI interface
 //ok you have a bug in castling, king can just float anywhere and proc castling, and spawn in rook
 //that seems to be from the AI?^
-//
+// i suspect my splice is still bugged because i never revert the captured piece?
 //you need to fix isKingInCheckmate for en passants
