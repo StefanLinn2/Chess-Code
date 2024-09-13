@@ -37,9 +37,7 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-let boardHistory = fenToBoard('8/8/4ppp1/4pkp1/4Ppp1/3P5/8/4K3 b - e3 0 1');
-
+let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -630,7 +628,7 @@ function onClick(event) {
         let promotionType = promotionSelected(row, col);
         if (promotionType) {
             movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
-            //doAIMove();
+            doAIMove();
             whitePawnPromotion = false;
             blackPawnPromotion = false;
             selectedSquare = null;
@@ -683,7 +681,7 @@ function onClick(event) {
                     }
                 }
                 movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
-                //doAIMove();
+                doAIMove();
                 if (!pawnPromotion()) {
                     selectedSquare = null;
                     selectedMove = null;
@@ -1276,18 +1274,33 @@ function isKingInCheckmate(_boardHistory) {
     let simulatedBoardHistory = deepCopyBoardHistory(_boardHistory);
     let simulatedBoard = simulatedBoardHistory[simulatedBoardHistory.length - 1].board;
     let playerTurn = simulatedBoardHistory[simulatedBoardHistory.length - 1].playerTurn;
+    let enPassantCapture = simulatedBoardHistory[simulatedBoardHistory.length - 1].enPassant;
     let kingLocation = findKingPosition(simulatedBoard, playerTurn);
     for (let row = 0; row < simulatedBoard.length; row++) {
         for (let col = 0; col < simulatedBoard[row].length; col++) {
             let piece = simulatedBoard[row][col];
             if (piece.color === playerTurn && piece.type !== undefined) {
                 let moves = validMoves(piece, row, col, simulatedBoardHistory);
-                for (let i = 0; i < moves.length; i++) {
-                    let move = moves[i];
+                for (let move of moves) {
                     let simulatedMove = simulatedBoard[move.row][move.col];
-                    simulatedBoard[move.row][move.col] = piece;
-                    simulatedBoard[row][col] = {};
-                    //use playMove
+                    let capturedPawn = null;
+                    if (enPassantCapture &&
+                        enPassantCapture.row === move.row &&
+                        enPassantCapture.col === move.col &&
+                        piece.type === 'pawn') {
+                        if (piece.color === 'white') {
+                            capturedPawn = simulatedBoard[move.row + 1][move.col];
+                            simulatedBoard[move.row + 1][move.col] = {};
+                        } else {
+                            capturedPawn = simulatedBoard[move.row - 1][move.col];
+                            simulatedBoard[move.row - 1][move.col] = {};
+                        }
+                        simulatedBoard[move.row][move.col] = piece;
+                        simulatedBoard[row][col] = {};
+                    } else {
+                        simulatedBoard[move.row][move.col] = piece;
+                        simulatedBoard[row][col] = {};
+                    }
                     let simulatedKingLocation = findKingPosition(simulatedBoard, playerTurn);
                     if (!isSquareThreatened(simulatedKingLocation.row, simulatedKingLocation.col, simulatedBoardHistory)) {
                         simulatedBoard[row][col] = piece;
@@ -1296,6 +1309,13 @@ function isKingInCheckmate(_boardHistory) {
                     }
                     simulatedBoard[row][col] = piece;
                     simulatedBoard[move.row][move.col] = simulatedMove;
+                    if (capturedPawn) {
+                        if (piece.color === 'white') {
+                            simulatedBoard[move.row + 1][move.col] = capturedPawn;
+                        } else {
+                            simulatedBoard[move.row - 1][move.col] = capturedPawn;
+                        }
+                    }
                 }
             }
         }
@@ -1645,4 +1665,4 @@ setInterval(drawGame, 16);
 //ok you have a bug in castling, king can just float anywhere and proc castling, and spawn in rook
 //that seems to be from the AI?^
 // i suspect my splice is still bugged because i never revert the captured piece?
-//you need to fix isKingInCheckmate for en passants
+//you need to fix isKingInCheckmate for en passant
