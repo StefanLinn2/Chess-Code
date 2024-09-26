@@ -2050,9 +2050,7 @@ function testPawnPromotionMoveList() {
 function testPlayMove() {
     let board = fenToBoard('4k1r1/8/8/8/8/8/8/7K w - - 0 1');
     let move = legalMoves(board);
-    console.log(move)
     let board2 = playMove(board, move[0]);
-    console.log(board2)
     assert(boardToFen(board2[board2.length - 1]) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
 }
 
@@ -2096,11 +2094,9 @@ function testEnPassantOutOfCheck(){
     let board = fenToBoard('8/8/4ppp1/4pkp1/4Ppp1/3P5/8/4K3 b - e3 0 1');
     assert (legalMoves(board).length === 1, 'the only way out is to enpassant out of check');
 }
-//enpassant check removal test
-//'8/8/8/5k2/4Pp2/8/8/4K3 w - e3 0 1'
 
 //mate in 2, weird bug where joelAI crashes
-//'1rbqkb1r/pppppppp/2n4n/6N1/2B1P3/5Q2/PPPP1PPP/RNB1K2R w KQk - 0 6'
+//'1rbqkb1r/pppppQpp/2n4n/6N1/2B1P3/8/PPPP1PPP/RNB1K2R b KQk - 0 6'
 
 function testChessScript(fen) {
     for (let fen of fens) {
