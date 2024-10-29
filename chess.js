@@ -1,5 +1,4 @@
 //StefanLinn2
-//readers beware: spaghetti below
 
 const canvas = document.createElement('canvas');
 canvas.width = canvas.height = 700;
@@ -37,7 +36,9 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+let boardHistory = fenToBoard('rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5');
+//let boardHistory = fenToBoard('rnbq1bnr/ppppk1p1/4P3/7p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQ - 1 6');
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -275,7 +276,7 @@ function fenToBoard(_fen) {
 function boardToFen(_boardHistory) {
     let fen = '';
     for (let i = 0; i < _boardHistory.board.length; i++) {
-        counter = 0;
+        let counter = 0;
         for (let j = 0; j < 8; j++) {
             if (_boardHistory.board[i][j].type) {
                 if (counter > 0) {
@@ -776,6 +777,7 @@ function returnEnPassantSquare(piece, fromRow, toRow, col) {
 
 function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion = null) {
     let board = deepCopyBoard(boardHistory[boardHistory.length - 1].board);
+    let testboard = deepCopyBoard(board);
     let piece = board[startRow][startCol];
     let pawnHasMovedStatus = null;
     let capturedPieceStatus = null;
@@ -802,7 +804,6 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
             board[7][7] = {};
             board[7][5] = { type: 'rook', color: 'white' };
             board[startRow][startCol] = {};
-            console.log('hi')
         }
         else if (boardHistory[boardHistory.length - 1].playerTurn === 'black' &&
             boardHistory[boardHistory.length - 1].blackKingCastleStatus) {
@@ -883,6 +884,25 @@ function movePiece(startRow, startCol, endRow, endCol, boardHistory, promotion =
         }
         pushBoardHistory(null, castlingUpdate, halfMoveClockReset, board, boardHistory);
     }
+    let whiteKingPresent = false;
+    let blackKingPresent = false;
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            let square = board[row][col];
+            if (square.type === 'king') {
+                if (square.color === 'white') whiteKingPresent = true;
+                if (square.color === 'black') blackKingPresent = true;
+            }
+        }
+    }
+
+    if (!whiteKingPresent || !blackKingPresent) {
+        console.error(`King missing from board after move from (${startRow}, ${startCol}) to (${endRow}, ${endCol})`);
+        console.log("Board state after move:", board);
+        console.log("previous board is: ", testboard);
+        throw new Error("A king is missing from the board.");
+    }
     return board;
 }
 
@@ -907,9 +927,10 @@ function validMoves(piece, row, col, _boardHistory) {
     }
 }
 
+//some shit is wrong in here
 function validPawnMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
-    let _board = _boardHistory[boardHistory.length - 1].board;
+    let _board = _boardHistory[_boardHistory.length - 1].board;
     let direction = (piece.color === 'white') ? -1 : 1;
     if ((piece.color === 'white' && currentRow === 0) || (piece.color === 'black' && currentRow === 7)) {
         return moves;
@@ -1509,20 +1530,20 @@ function legalMoves(boardHistory) {
     let currentBoard = boardHistory[boardHistory.length - 1].board;
     let playerMoves = [];
     function processPieceMoves(piece, row, col) {
-        if (piece.color === currentPlayerTurn) {
-            let pieceMoves = legalMovesPerPiece(piece, row, col, boardHistory);
-            if (pieceMoves.length > 0) {
-                for (let move of pieceMoves) {
-                    playerMoves.push(move);
-                }
+        let pieceMoves = legalMovesPerPiece(piece, row, col, boardHistory);
+        //board is correct up to here dude
+        if (pieceMoves.length > 0) {
+            for (let move of pieceMoves) {
+                playerMoves.push(move);
             }
         }
+
     }
     function iterateBoard() {
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
                 let square = currentBoard[row][col];
-                if (square.type) {
+                if (square.type && square.color === currentPlayerTurn) {
                     processPieceMoves(square, row, col);
                 }
             }
@@ -1533,8 +1554,9 @@ function legalMoves(boardHistory) {
 }
 
 function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
-    let validMovesForPiece = validMoves(piece, fromRow, fromCol, boardHistory);
-    let legalMovesForPiece = spliceSelfCheckingMoves(piece, fromRow, fromCol, validMovesForPiece, boardHistory);
+    let currentBoardState = deepCopyBoardHistory(boardHistory);
+    let validMovesForPiece = validMoves(piece, fromRow, fromCol, currentBoardState);
+    let legalMovesForPiece = spliceSelfCheckingMoves(piece, fromRow, fromCol, validMovesForPiece, currentBoardState);
     let moves = [];
     for (let i = 0; i < legalMovesForPiece.length; i++) {
         let move = legalMovesForPiece[i];
@@ -1551,7 +1573,7 @@ function legalMovesPerPiece(piece, fromRow, fromCol, boardHistory) {
 }
 
 function playMove(boardHistory, move) {
-    let copyBoardHistory = [...boardHistory];
+    let copyBoardHistory = deepCopyBoardHistory(boardHistory);
     movePiece(move.fromRow, move.fromCol, move.toRow, move.toCol, copyBoardHistory, move.promotion);
     return copyBoardHistory;
 }
@@ -1617,7 +1639,7 @@ function joelAI(board) {
     for (let move of moves) {
         let newBoard = playMove(board, move);
         let newBoardScore = -joelScoreBoard(newBoard, 1);
-        if (newBoardScore > largestScore) {
+        if (newBoardScore >= largestScore) {
             largestScore = newBoardScore;
             largestScoringMove = move;
         }
@@ -1626,6 +1648,12 @@ function joelAI(board) {
 }
 
 function joelScoreBoard(board, depth) {
+    if (isKingInCheckmate(board)) {
+        return -Infinity;
+    }
+    if (isGameInDraw(board)) {
+        return 0;
+    }
     if (depth === 0) {
         return scoreBoard(board);
     }

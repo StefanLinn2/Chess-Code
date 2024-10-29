@@ -2085,14 +2085,16 @@ function testScoreBoard() {
     assert(scoreBoard6 === 0, 'scoreBoard6 is a draw and should = 0')
 }
 
-function testLegalMoves(){
+function testLegalMoves() {
     let board = fenToBoard('r1bB1knr/p1p1Q1b1/1p4pp/2nB4/3PP3/8/PPP2PPP/RN2K1NR b KQ - 2 11');
     assert(legalMoves(board).length === 1, 'you should have 1 legal move to get king out of check');
 }
+//rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5
+//king gets deleted somehow by pawn
 
-function testEnPassantOutOfCheck(){
+function testEnPassantOutOfCheck() {
     let board = fenToBoard('8/8/4ppp1/4pkp1/4Ppp1/3P5/8/4K3 b - e3 0 1');
-    assert (legalMoves(board).length === 1, 'the only way out is to enpassant out of check');
+    assert(legalMoves(board).length === 1, 'the only way out is to enpassant out of check');
 }
 
 //mate in 2, weird bug where joelAI crashes
