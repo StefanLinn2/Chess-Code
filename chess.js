@@ -36,8 +36,8 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-let boardHistory = fenToBoard('rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5');
+let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+//let boardHistory = fenToBoard('rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5');
 //let boardHistory = fenToBoard('rnbq1bnr/ppppk1p1/4P3/7p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQ - 1 6');
 
 function algorithmicToRowCol(algoString) {
@@ -275,7 +275,7 @@ function fenToBoard(_fen) {
 
 function boardToFen(_boardHistory) {
     let fen = '';
-    for (let i = 0; i < _boardHistory.board.length; i++) {
+    for (let i = 0; i < 8; i++) {
         let counter = 0;
         for (let j = 0; j < 8; j++) {
             if (_boardHistory.board[i][j].type) {
@@ -620,78 +620,89 @@ function promotionSelected(row, col) {
     return promotionType;
 }
 
-function onClick(event) {
-    let _board = boardHistory[boardHistory.length - 1].board;
-    let col = Math.floor(event.offsetX / block);
-    let row = Math.floor(event.offsetY / block);
-    let square = _board[row][col];
+function resetPawnPromotionFlags() {
+    whitePawnPromotion = false;
+    blackPawnPromotion = false;
+    selectedSquare = null;
+    selectedMove = null;
+}
+
+function handlePawnPromotion(row, col) {
     if (pawnPromotion()) {
         let promotionType = promotionSelected(row, col);
         if (promotionType) {
             movePiece(selectedSquare.row, selectedSquare.col, selectedMove.row, selectedMove.col, boardHistory, promotionType);
             doAIMove();
-            whitePawnPromotion = false;
-            blackPawnPromotion = false;
-            selectedSquare = null;
-            selectedMove = null;
+            resetPawnPromotionFlags();
         }
-        return;
-    } else
-        if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
-            selectedSquare = null;
-        } else if (square.type && boardHistory[boardHistory.length - 1].playerTurn === square.color) {
-            selectedSquare = { row: row, col: col };
-            selectedPieceType = square.type;
-        } else if (selectedSquare) {
-            let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory), boardHistory);
-            for (let i = 0; i < validDestinations.length; i++) {
-                if (validDestinations[i].row === row && validDestinations[i].col === col) {
-                    selectedMove = validDestinations[i];
-                    break;
+        return true;
+    }
+    return false;
+}
+
+function onClick(event) {
+    let _board = boardHistory[boardHistory.length - 1].board;
+    let col = Math.floor(event.offsetX / block);
+    let row = Math.floor(event.offsetY / block);
+    let square = _board[row][col];
+    if (handlePawnPromotion(row, col)) {
+        return
+    }
+    if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
+        selectedSquare = null;
+    } else if (square.type && boardHistory[boardHistory.length - 1].playerTurn === square.color) {
+        selectedSquare = { row: row, col: col };
+        selectedPieceType = square.type;
+    } else if (selectedSquare) {
+        let validDestinations = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory), boardHistory);
+        for (let i = 0; i < validDestinations.length; i++) {
+            if (validDestinations[i].row === row && validDestinations[i].col === col) {
+                selectedMove = validDestinations[i];
+                break;
+            }
+        }
+        if (selectedMove) {
+            let piece = _board[selectedSquare.row][selectedSquare.col];
+            let pawnHasMovedStatus = null;
+            let capturedPieceStatus = null;
+
+            let endSquare = _board[row][col];
+            let promotion = null;
+            if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
+                capturedPieceStatus = true;
+            } else {
+                capturedPieceStatus = false;
+            }
+            if (piece.type === 'pawn') {
+                pawnHasMovedStatus = true;
+            } else {
+                pawnHasMovedStatus = false;
+            }
+            if (capturedPieceStatus || pawnHasMovedStatus) {
+                halfMoveClockReset = true;
+            }
+            if (selectedMove.promotion) {
+                if (selectedMove.row === 0) {
+                    whitePawnPromotion = true;
+                    blackPawnPromotion = false;
+                    return;
+                } else if (selectedMove.row === 7) {
+                    whitePawnPromotion = false;
+                    blackPawnPromotion = true;
+                    return;
                 }
             }
-            if (selectedMove) {
-                let piece = _board[selectedSquare.row][selectedSquare.col];
-                let pawnHasMovedStatus = null;
-                let capturedPieceStatus = null;
-
-                let endSquare = _board[row][col];
-                let promotion = null;
-                if (endSquare.type && endSquare.color !== boardHistory[boardHistory.length - 1].playerTurn) {
-                    capturedPieceStatus = true;
-                } else {
-                    capturedPieceStatus = false;
-                }
-                if (piece.type === 'pawn') {
-                    pawnHasMovedStatus = true;
-                } else {
-                    pawnHasMovedStatus = false;
-                }
-                if (capturedPieceStatus || pawnHasMovedStatus) {
-                    halfMoveClockReset = true;
-                }
-                if (selectedMove.promotion) {
-                    if (selectedMove.row === 0) {
-                        whitePawnPromotion = true;
-                        blackPawnPromotion = false;
-                        return;
-                    } else if (selectedMove.row === 7) {
-                        whitePawnPromotion = false;
-                        blackPawnPromotion = true;
-                        return;
-                    }
-                }
-                movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
-                doAIMove();
-                if (!pawnPromotion()) {
-                    selectedSquare = null;
-                    selectedMove = null;
-                }
-            } else {
+            movePiece(selectedSquare.row, selectedSquare.col, row, col, boardHistory, promotion);
+            doAIMove();
+            if (!pawnPromotion()) {
                 selectedSquare = null;
                 selectedMove = null;
             }
+        } else {
+            selectedSquare = null;
+            selectedMove = null;
         }
+    }
 }
 
 canvas.addEventListener('click', onClick);

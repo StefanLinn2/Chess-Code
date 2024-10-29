@@ -2116,7 +2116,6 @@ function testChessScript(fen) {
     testScoreBoard();
     testLegalMoves();
     testEnPassantOutOfCheck();
-    //hey my tests suck
     assert(isNumberLike('7'), 'should return true because 7 is a number');
     assert(!isNumberLike('p'), 'testing p as your string, should return false');
 }
