@@ -36,9 +36,11 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 //let boardHistory = fenToBoard('rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5');
 //let boardHistory = fenToBoard('rnbq1bnr/ppppk1p1/4P3/7p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQ - 1 6');
+let boardHistory = fenToBoard('Q7/1P6/3k2pb/4n3/p6P/P2K4/2P4P/R7 w - - 1 33')
+
 
 function algorithmicToRowCol(algoString) {
     let row = null;
@@ -938,7 +940,6 @@ function validMoves(piece, row, col, _boardHistory) {
     }
 }
 
-//some shit is wrong in here
 function validPawnMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
     let _board = _boardHistory[_boardHistory.length - 1].board;
@@ -1011,7 +1012,7 @@ function equalMoveArrayCheck(array1, array2) {
 
 function validRookMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
-    let _board = _boardHistory[boardHistory.length - 1].board;
+    let _board = _boardHistory[_boardHistory.length - 1].board;
     for (let row = currentRow - 1; row >= 0; row--) {
         if (_board[row][currentCol] && _board[row][currentCol].type) {
             if (_board[row][currentCol].color !== piece.color) {
@@ -1136,9 +1137,10 @@ function validQueenMoves(piece, currentRow, currentCol, _boardHistory) {
     return moves;
 }
 
+//there's a bug in here where your black king can just move into an square white king is attacking
 function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
-    let lastState = _boardHistory[boardHistory.length - 1];
+    let lastState = _boardHistory[_boardHistory.length - 1];
     let _board = lastState.board;
     let directions = [
         { row: -1, col: -1 },
@@ -1699,6 +1701,141 @@ function drawGame() {
 };
 
 setInterval(drawGame, 16);
+
+let brokenBoard = {
+    "board": [
+        [
+            {
+                "type": "queen",
+                "color": "white"
+            },
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {}
+        ],
+        [
+            {},
+            {
+                "type": "pawn",
+                "color": "white"
+            },
+            {},
+            {},
+            {},
+            {},
+            {},
+            {}
+        ],
+        [
+            {},
+            {},
+            {},
+            {
+                "type": "king",
+                "color": "black"
+            },
+            {},
+            {},
+            {
+                "type": "pawn",
+                "color": "black"
+            },
+            {
+                "type": "bishop",
+                "color": "black"
+            }
+        ],
+        [
+            {},
+            {},
+            {},
+            {},
+            {
+                "type": "knight",
+                "color": "black"
+            },
+            {},
+            {},
+            {}
+        ],
+        [
+            {
+                "type": "pawn",
+                "color": "black"
+            },
+            {},
+            {},
+            {},
+            {
+                "type": "king",
+                "color": "white"
+            },
+            {},
+            {},
+            {
+                "type": "pawn",
+                "color": "white"
+            }
+        ],
+        [
+            {
+                "type": "pawn",
+                "color": "white"
+            },
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {}
+        ],
+        [
+            {},
+            {},
+            {
+                "type": "pawn",
+                "color": "white"
+            },
+            {},
+            {},
+            {},
+            {},
+            {
+                "type": "pawn",
+                "color": "white"
+            }
+        ],
+        [
+            {
+                "type": "rook",
+                "color": "white"
+            },
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {}
+        ]
+    ],
+    "playerTurn": "black",
+    "whiteKingCastleStatus": false,
+    "whiteQueenCastleStatus": false,
+    "blackKingCastleStatus": false,
+    "blackQueenCastleStatus": false,
+    "enPassant": null,
+    "halfMoveClock": 2,
+    "fullMoveClock": 33
+}
+let brokenBoardFen = 'Q7/1P6/3k2pb/4n3/p3K2P/P7/2P4P/R7 b - - 2 33'
+let brokenBoardFenPrior = 'Q7/1P6/3k2pb/4n3/p6P/P2K4/2P4P/R7 w - - 1 33'
+
 
 //continue AI interface
 //ok you have a bug in castling, king can just float anywhere and proc castling, and spawn in rook
