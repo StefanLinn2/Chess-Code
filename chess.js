@@ -36,10 +36,11 @@ let selectedPieceType = null;
 let selectedMove = null;
 
 
-//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+
 //let boardHistory = fenToBoard('rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5');
 //let boardHistory = fenToBoard('rnbq1bnr/ppppk1p1/4P3/7p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQ - 1 6');
-let boardHistory = fenToBoard('Q7/1P6/3k2pb/4n3/p6P/P2K4/2P4P/R7 w - - 1 33')
+//let boardHistory = fenToBoard('Q7/1P6/3k2pb/4n3/p6P/P2K4/2P4P/R7 w - - 1 33')
 
 
 function algorithmicToRowCol(algoString) {
@@ -1137,7 +1138,6 @@ function validQueenMoves(piece, currentRow, currentCol, _boardHistory) {
     return moves;
 }
 
-//there's a bug in here where your black king can just move into an square white king is attacking
 function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
     let moves = [];
     let lastState = _boardHistory[_boardHistory.length - 1];
@@ -1152,14 +1152,32 @@ function validKingMoves(piece, currentRow, currentCol, _boardHistory) {
         { row: 1, col: 0 },
         { row: 1, col: 1 }
     ];
+    let enemyKingMoveArray = [];
+    let enemyKing = findKingPosition(_board, invertCurrentPlayerTurn(_boardHistory))
+    for (let dir of directions) {
+        let enemyKingRow = enemyKing.row + dir.row;
+        let enemyKingCol = enemyKing.col + dir.col;
+        if (enemyKingRow >= 0 && enemyKingRow < 8 && enemyKingCol >= 0 && enemyKingCol < 8) {
+            enemyKingMoveArray.push({ row: enemyKingRow, col: enemyKingCol })
+        }
+    }
     for (let dir of directions) {
         let newRow = currentRow + dir.row;
         let newCol = currentCol + dir.col;
         if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
             let targetSquare = _board[newRow][newCol];
-            if (!targetSquare.type || targetSquare.color !== piece.color) {
+            let isAllyOccupied = targetSquare.type && targetSquare.color === piece.color;
+            let isThreatenedByEnemyKing = false;
+            for (let enemySquare of enemyKingMoveArray) {
+                if (enemySquare.row === newRow && enemySquare.col === newCol) {
+                    isThreatenedByEnemyKing = true;
+                    break;
+                }
+            }
+            if (!isAllyOccupied && !isThreatenedByEnemyKing) {
                 moves.push({ row: newRow, col: newCol });
             }
+
         }
     }
     if (lastState.playerTurn === 'white') {
@@ -1401,6 +1419,7 @@ function deepCopyBoardHistory(boardHistory) {
 }
 // build a test
 
+//splice is not removing 3, 3 from the broken board
 function spliceSelfCheckingMoves(simulatedPiece, _pieceRow, _pieceCol, _moveArray, boardHistory) {
     let splicedMoveArray = [];
     let simulatedBoardHistory = deepCopyBoardHistory(boardHistory);
@@ -1702,143 +1721,5 @@ function drawGame() {
 
 setInterval(drawGame, 16);
 
-let brokenBoard = {
-    "board": [
-        [
-            {
-                "type": "queen",
-                "color": "white"
-            },
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {}
-        ],
-        [
-            {},
-            {
-                "type": "pawn",
-                "color": "white"
-            },
-            {},
-            {},
-            {},
-            {},
-            {},
-            {}
-        ],
-        [
-            {},
-            {},
-            {},
-            {
-                "type": "king",
-                "color": "black"
-            },
-            {},
-            {},
-            {
-                "type": "pawn",
-                "color": "black"
-            },
-            {
-                "type": "bishop",
-                "color": "black"
-            }
-        ],
-        [
-            {},
-            {},
-            {},
-            {},
-            {
-                "type": "knight",
-                "color": "black"
-            },
-            {},
-            {},
-            {}
-        ],
-        [
-            {
-                "type": "pawn",
-                "color": "black"
-            },
-            {},
-            {},
-            {},
-            {
-                "type": "king",
-                "color": "white"
-            },
-            {},
-            {},
-            {
-                "type": "pawn",
-                "color": "white"
-            }
-        ],
-        [
-            {
-                "type": "pawn",
-                "color": "white"
-            },
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {}
-        ],
-        [
-            {},
-            {},
-            {
-                "type": "pawn",
-                "color": "white"
-            },
-            {},
-            {},
-            {},
-            {},
-            {
-                "type": "pawn",
-                "color": "white"
-            }
-        ],
-        [
-            {
-                "type": "rook",
-                "color": "white"
-            },
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {}
-        ]
-    ],
-    "playerTurn": "black",
-    "whiteKingCastleStatus": false,
-    "whiteQueenCastleStatus": false,
-    "blackKingCastleStatus": false,
-    "blackQueenCastleStatus": false,
-    "enPassant": null,
-    "halfMoveClock": 2,
-    "fullMoveClock": 33
-}
-let brokenBoardFen = 'Q7/1P6/3k2pb/4n3/p3K2P/P7/2P4P/R7 b - - 2 33'
-let brokenBoardFenPrior = 'Q7/1P6/3k2pb/4n3/p6P/P2K4/2P4P/R7 w - - 1 33'
 
-
-//continue AI interface
-//ok you have a bug in castling, king can just float anywhere and proc castling, and spawn in rook
-//that seems to be from the AI?^
-// i suspect my splice is still bugged because i never revert the captured piece?
-//you need to fix isKingInCheckmate for en passant
+//you need to test isKingInCheckmate for en passant'ing out of check
