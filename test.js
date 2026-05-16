@@ -2107,6 +2107,19 @@ function testEnPassantOutOfCheck() {
 //mate in 2, weird bug where joelAI crashes
 //'1rbqkb1r/pppppQpp/2n4n/6N1/2B1P3/8/PPPP1PPP/RNB1K2R b KQk - 0 6'
 
+function testStalemateDraw() {
+    let history = fenToBoard('k7/8/1Q6/8/8/8/8/7K b - - 0 1');
+    assert(isGameInDraw(history), "Should be a draw (Stalemate)");
+}
+
+function testFiftyMoveRule() {
+    let history = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    history[0].halfMoveClock = 100;
+    assert(isGameInDraw(history), "Should be a draw at 100");
+    history[0].halfMoveClock = 2424;
+    assert(isGameInDraw(history), "Should be a draw even at 2424");
+}
+
 function testChessScript(fen) {
     for (let fen of fens) {
         testFen(fen + ' 12 2424');
@@ -2125,6 +2138,8 @@ function testChessScript(fen) {
     testEnPassantOutOfCheck();
     assert(isNumberLike('7'), 'should return true because 7 is a number');
     assert(!isNumberLike('p'), 'testing p as your string, should return false');
+    testStalemateDraw();
+    testFiftyMoveRule();
 }
 
 testChessScript();
