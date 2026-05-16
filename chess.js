@@ -1,8 +1,6 @@
 //StefanLinn2
 
 
-
-
 function assert(value, message) {
     if (!value) {
         throw new Error(message);
@@ -24,6 +22,7 @@ let blackPawnPromotion = false;
 let selectedSquare = null;
 let selectedPieceType = null;
 let selectedMove = null;
+let gameStatus = "active";
 
 
 let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
@@ -31,9 +30,6 @@ let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk
 //let boardHistory = fenToBoard('rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5');
 //let boardHistory = fenToBoard('rnbq1bnr/ppppk1p1/4P3/7p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQ - 1 6');
 //let boardHistory = fenToBoard('Q7/1P6/3k2pb/4n3/p6P/P2K4/2P4P/R7 w - - 1 33')
-
-
-
 
 
 let testerInitialBoard = [
@@ -58,12 +54,6 @@ let testerInitialBoard = [
         fullMoveClock: 1,
     }
 ];
-
-
-
-
-
-
 
 function pawnPromotion() {
     if (whitePawnPromotion || blackPawnPromotion) {
@@ -171,6 +161,7 @@ function onClick(event) {
             selectedMove = null;
         }
     }
+    updateGameStatus();
 }
 
 canvas.addEventListener('click', onClick);
@@ -1075,96 +1066,8 @@ function playMove(boardHistory, move) {
     return copyBoardHistory;
 }
 
-function scoreBoard(board) {
-    if (isKingInCheckmate(board)) {
-        return -Infinity;
-    }
-    if (isGameInDraw(board)) {
-        return 0;
-    }
-    let latestBoardHistory = board[board.length - 1];
-    let latestBoard = latestBoardHistory.board;
-    let pieceValues = {
-        'pawn': 1,
-        'knight': 3,
-        'bishop': 3,
-        'rook': 5,
-        'queen': 9,
-    };
-    let score = 0;
-    for (let row = 0; row < latestBoard.length; row++) {
-        for (let col = 0; col < latestBoard[row].length; col++) {
-            let scannedSquare = latestBoard[row][col];
-            if (scannedSquare.type) {
-                let pieceScore = pieceValues[scannedSquare.type] || 0;
-                if (scannedSquare.color === latestBoardHistory.playerTurn) {
-                    score += pieceScore;
-                } else {
-                    score -= pieceScore;
-                }
-            }
-        }
-    }
-    return score;
-}
 
-function randomAI(board) {
-    let moves = legalMoves(board);
-    let randomIndex = Math.floor(Math.random() * moves.length);
-    return moves[randomIndex];
-}
 
-function greedyAI(board) {
-    let moves = legalMoves(board);
-    let largestScore = -Infinity;
-    let largestScoringMove = null;
-    for (let move of moves) {
-        let newBoard = playMove(board, move);
-        let newBoardScore = -scoreBoard(newBoard);
-        if (newBoardScore > largestScore) {
-            largestScore = newBoardScore;
-            largestScoringMove = move;
-        }
-    }
-    return largestScoringMove;
-}
-
-function joelAI(board) {
-    let moves = legalMoves(board);
-    let largestScore = -Infinity;
-    let largestScoringMove = null;
-    for (let move of moves) {
-        let newBoard = playMove(board, move);
-        let newBoardScore = -joelScoreBoard(newBoard, 1);
-        if (newBoardScore >= largestScore) {
-            largestScore = newBoardScore;
-            largestScoringMove = move;
-        }
-    }
-    return largestScoringMove;
-}
-
-function joelScoreBoard(board, depth) {
-    if (isKingInCheckmate(board)) {
-        return -Infinity;
-    }
-    if (isGameInDraw(board)) {
-        return 0;
-    }
-    if (depth === 0) {
-        return scoreBoard(board);
-    }
-    let moves = legalMoves(board);
-    let largestScore = -Infinity;
-    for (let move of moves) {
-        let newBoard = playMove(board, move);
-        let newBoardScore = -joelScoreBoard(newBoard, depth - 1);
-        if (newBoardScore > largestScore) {
-            largestScore = newBoardScore;
-        }
-    }
-    return largestScore;
-}
 
 function drawGame() {
     let latestBoardHistory = boardHistory[boardHistory.length - 1];
@@ -1174,17 +1077,26 @@ function drawGame() {
         bannerFilm();
         drawPawnPromotionBanner();
     }
-    if (isGameInDraw(boardHistory)) {
-        console.log("game has ended in a draw!");
-    } else if (isKingInCheckmate(boardHistory)) {
-        console.log(invertCurrentPlayerTurn(boardHistory) + " won!")
-    }
-    else if (isSquareThreatened(findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).row, findKingPosition(latestBoardHistory.board, latestBoardHistory.playerTurn).col, boardHistory)) {
-        console.log(boardHistory[boardHistory.length - 1].playerTurn + ' is in check!');
-    }
 };
-
 setInterval(drawGame, 16);
 
 
 //you need to test isKingInCheckmate for en passant'ing out of check
+
+function updateGameStatus() {
+    let latest = boardHistory[boardHistory.length - 1];
+    let kingPos = findKingPosition(latest.board, latest.playerTurn);
+
+    if (isKingInCheckmate(boardHistory)) {
+        gameStatus = "checkmate";
+        console.log(invertCurrentPlayerTurn(boardHistory) + " won!");
+    } else if (isGameInDraw(boardHistory)) {
+        gameStatus = "draw";
+        console.log("Game has ended in a draw!");
+    } else if (kingPos && isSquareThreatened(kingPos.row, kingPos.col, boardHistory)) {
+        gameStatus = "check";
+        console.log(latest.playerTurn + ' is in check!');
+    } else {
+        gameStatus = "active";
+    }
+}
