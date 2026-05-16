@@ -64,7 +64,12 @@ function drawBoard(_board) {
     if (selectedSquare) {
         highlightPiece(selectedSquare.row, selectedSquare.col);
         let moves = spliceSelfCheckingMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, validMoves(_board[selectedSquare.row][selectedSquare.col], selectedSquare.row, selectedSquare.col, boardHistory), boardHistory);
+        let highlightedSquares = new Set();
         for (let move of moves) {
+            let squareKey = `${move.row},${move.col}`;
+            if (highlightedSquares.has(squareKey)) continue;
+            highlightedSquares.add(squareKey);
+
             let targetSquare = _board[move.row][move.col];
             if (targetSquare.type && targetSquare.color != boardHistory[boardHistory.length - 1].playerTurn) {
                 highlightEnemyPiece(move.row, move.col);
