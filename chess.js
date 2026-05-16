@@ -981,9 +981,8 @@ function isGameInDraw(boardHistory) {
     if (isStalemate(boardHistory)) {
         return true;
     }
-    if (boardHistory[boardHistory.length - 1].halfMoveClock === 50) {
+    if (boardHistory[boardHistory.length - 1].halfMoveClock === 100) {
         return true;
-        //build a test for me
     }
     return false;
 }
