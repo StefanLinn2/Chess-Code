@@ -25,8 +25,8 @@ let selectedMove = null;
 let gameStatus = "active";
 
 
-//let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-let boardHistory = fenToBoard('5q2/6P1/8/8/8/8/8/8 w - - 0 1')
+let boardHistory = fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+//let boardHistory = fenToBoard('5q2/8/6P1/8/8/8/8/8 w - - 0 1')
 //let boardHistory = fenToBoard('rnbqkbnr/pppp2p1/4p3/5P1p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5');
 //let boardHistory = fenToBoard('rnbq1bnr/ppppk1p1/4P3/7p/2B5/5Q2/PPPP1PPP/RNB1K1NR w KQ - 1 6');
 //let boardHistory = fenToBoard('Q7/1P6/3k2pb/4n3/p6P/P2K4/2P4P/R7 w - - 1 33')

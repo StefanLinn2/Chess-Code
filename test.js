@@ -2049,9 +2049,10 @@ function testPawnPromotionMoveList() {
 
 function testPlayMove() {
     let board = fenToBoard('4k1r1/8/8/8/8/8/8/7K w - - 0 1');
-    let move = legalMoves(board);
-    let board2 = playMove(board, move[0]);
-    assert(boardToFen(board2[board2.length - 1]) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1')
+    // Manual Move: King from h1 (7,7) to h2 (6,7)
+    let manualMove = { fromRow: 7, fromCol: 7, toRow: 6, toCol: 7 };
+    let board2 = playMove(board, manualMove);
+    assert(boardToFen(board2[board2.length - 1]) === '4k1r1/8/8/8/8/8/7K/8 b - - 1 1', 'Manual Move h1 to h2 failed');
 }
 
 function testPlayMovePawnPromotion() {
