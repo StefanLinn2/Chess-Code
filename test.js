@@ -2064,7 +2064,15 @@ function testPlayMovePawnPromotion() {
 
 function testBlackQueenSideCastle() {
     let board = fenToBoard('r3k3/ppp1p3/n1p2n1b/5p2/3N4/3P4/PP1PPP1P/RNBQKB1R b KQq - 2 12');
-    let moves = legalMoves(board);
+    let castleMove = { fromRow: 0, fromCol: 4, toRow: 0, toCol: 2 };
+    let board2 = playMove(board, castleMove);
+    let finalState = board2[board2.length - 1];
+    let kingSquare = finalState.board[0][2];
+    assert(kingSquare.type === 'king' && kingSquare.color === 'black',
+        `King should be at c8, but square (0,2) actually contains: ${kingSquare.color} ${kingSquare.type}`);
+    let rookSquare = finalState.board[0][3];
+    assert(rookSquare.type === 'rook' && rookSquare.color === 'black',
+        `Rook should have jumped to d8, but square (0,3) actually contains: ${rookSquare.color} ${rookSquare.type}`);
 }
 
 function testScoreBoard() {
